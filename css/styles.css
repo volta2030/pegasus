@@ -1,0 +1,27 @@
+@import "./reset.css";
+
+body {
+  width: 100vw;
+  height: 99vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-top: 1px black solid;
+  position: absolute;
+}
+
+.icon {
+  width: 24px;
+  height: 24px;
+}
+
+#toolBox {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+}
+
+#previewImg {
+  position: inherit;
+  /* border: 1px rgba(0, 0, 0, 0.3) solid; */
+}

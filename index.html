@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <!-- <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'"
+    /> -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; connect-src 'self';font-src 'self'; img-src 'self' data: https:; style-src 'self' ; script-src 'self'"
+    />
+    <link href="./css/styles.css" rel="stylesheet" />
+    <title>Pegasus - Image Processing Tool</title>
+  </head>
+
+  <body>
+    <div id="toolBox">
+      <button id="resizeBtn">
+        <img class="icon" src="assets/resize.ico" />
+      </button>
+    </div>
+
+    <img id="previewImg" />
+
+    <script src="./renderer/main_renderer.js"></script>
+  </body>
+</html>
