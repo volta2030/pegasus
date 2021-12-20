@@ -1,6 +1,6 @@
 # pegasus
 
-The Image Processing Tool based on Electron Framework
+The Image Processing Tool based on 'Electron' framework & 'sharp' npm package
 
 ## 1. requirements
 ```
