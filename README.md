@@ -1,6 +1,6 @@
 # pegasus
 
-The Image Processing Tool based on Electron Framework.
+The Image Processing Tool based on Electron Framework
 
 ## 1. requirements
 ```
