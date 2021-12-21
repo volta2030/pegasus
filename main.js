@@ -68,7 +68,7 @@ app.whenReady().then(() => {
   // and load the index.html of the app.
   mainWindow.loadFile("index.html");
   // Open the DevTools.(only develop)
-  // mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 
   ipcMain.on("resizeImgREQ", (event) => {
     createView("resize", mainWindow);
@@ -99,21 +99,16 @@ app.whenReady().then(() => {
           },
           {
             label: "Save Image",
-            // click: () => {
-            //   dialog.showSaveDialog({
-
-            //   }).then((res) => {
-            //     event.sender.send("saveImageCMD", res);
-            //   });
-            // dialog
-            //   .showOpenDialog({
-            //     properties: [],
-            //     filters: [{ name: "Images", extensions: ["png"] }],
-            //   })
-            //   .then((res) => {
-            //     event.sender.send("openImageCMD", res.filePaths[0]);
-            //   });
-            // },
+            click: () => {
+              dialog
+                .showSaveDialog({
+                  title: "Save image",
+                  filters: [{ name: "Png file", extensions: ["png"] }],
+                })
+                .then((result) => {
+                  event.sender.send("saveImageCMD", result.filePath);
+                });
+            },
           },
         ],
       },
