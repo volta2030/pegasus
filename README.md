@@ -1,6 +1,8 @@
 # pegasus
 
-The Image Processing Tool based on 'Electron' framework & 'sharp' npm package
+#### The Image Processing Tool based on 'Electron' framework & 'sharp' npm package
+
+![image](https://user-images.githubusercontent.com/65960990/147102660-780c0677-995b-49fa-af16-46239b8eb4b7.png)
 
 ### development notes
 
