@@ -4,21 +4,22 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link href="./css/panel.css" rel="stylesheet" />
+    <link href="../css/panel.css" rel="stylesheet" />
     <title>Resize</title>
   </head>
   <body>
-    <div id="resizeDiv">
+    <div id="blurDiv">
       <input
-        id="resizeValue"
-        type="number"
-        min="0.1"
-        max="4.0"
-        placeholder="0.5"
+        id="blurValue"
+        type="range"
+        min="0.3"
+        max="10"
+        placeholder="1.0"
         step="0.1"
+        style="width: 200px"
       />
-      <button id="resizeExecuteBtn">Execute</button>
+      <button id="blurExecuteBtn">Execute</button>
     </div>
-    <script src="./renderer/resize_renderer.js"></script>
+    <script src="../renderer/blur_renderer.js"></script>
   </body>
 </html>

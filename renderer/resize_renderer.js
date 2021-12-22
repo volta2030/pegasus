@@ -1,7 +1,5 @@
 const { ipcRenderer } = require("electron");
-// const { fs } = require("fs");
-
-var scale = 0.5;
+var scale = 2;
 
 document.getElementById("resizeValue").addEventListener("input", (event) => {
   scale = event.target.value;
@@ -10,7 +8,3 @@ document.getElementById("resizeValue").addEventListener("input", (event) => {
 document.getElementById("resizeExecuteBtn").addEventListener("click", () => {
   ipcRenderer.send("resizeValueSEND", scale);
 });
-
-// ipcRenderer.on("resizeImageCMD", (event, res) => {
-//   console.log(res);
-// });

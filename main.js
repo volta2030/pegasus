@@ -33,6 +33,7 @@ function createMainWindow() {
 
 function createView(type, mainWindow) {
   const view = new BrowserView({
+    resizable: true,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -42,8 +43,9 @@ function createView(type, mainWindow) {
     },
   });
   mainWindow.setBrowserView(view);
-  view.setBounds({ x: 0, y: 32, width: 200, height: 100 });
-  view.webContents.loadFile("resize_panel.html");
+  view.setBounds({ x: 0, y: 32, width: 1280, height: 100 });
+  view.setAutoResize({ width: true, height: false });
+  view.webContents.loadFile(`./pages/_panel.html`);
   // view.webContents.openDevTools();
 }
 
@@ -68,14 +70,32 @@ app.whenReady().then(() => {
   // and load the index.html of the app.
   mainWindow.loadFile("index.html");
   // Open the DevTools.(only develop)
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 
-  ipcMain.on("resizeImgREQ", (event) => {
-    createView("resize", mainWindow);
+  ["resizeImgREQ", "blurImgREQ", "rotateImgREQ"].forEach((item, index, arr) => {
+    ipcMain.on(item, (event) => {
+      mainWindow
+        .getBrowserView()
+        .webContents.loadFile(
+          `./pages/${item.replace("ImgREQ", "")}_panel.html`
+        );
+    });
   });
 
   ipcMain.on("resizeValueSEND", (event, res) => {
-    mainWindow.webContents.send("resizeImageCMD", res);
+    mainWindow.webContents.send("resizeImgCMD", res);
+  });
+
+  ipcMain.on("blurValueSEND", (event, res) => {
+    mainWindow.webContents.send("blurImgCMD", res);
+  });
+
+  ipcMain.on("rotateLeftImgREQ", (event) => {
+    mainWindow.webContents.send("rotateLeftImgCMD");
+  });
+
+  ipcMain.on("rotateRightImgREQ", (event) => {
+    mainWindow.webContents.send("rotateRightImgCMD");
   });
 
   // main
@@ -122,7 +142,7 @@ app.whenReady().then(() => {
                 title: "About",
                 buttons: ["Ok"],
                 message:
-                  "Author : tmpark\nVersion : v1.0.0\nLicense : MIT Lisence\n",
+                  "Author : volta2030\nVersion : v1.0.0\nLicense : MIT Lisence\n",
               });
             },
           },
@@ -131,6 +151,7 @@ app.whenReady().then(() => {
     ];
     const menu = Menu.buildFromTemplate(template);
     Menu.setApplicationMenu(menu);
+    createView("", mainWindow);
   });
 
   app.on("activate", function () {

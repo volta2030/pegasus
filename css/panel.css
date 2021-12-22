@@ -6,8 +6,10 @@ body {
   align-items: center;
   height: 98px;
   border: 1px solid rgba(0, 0, 0, 0.3);
+  bottom: 0px;
 }
 
-#resizeDiv {
-  background-color: whitesmoke;
+.icon {
+  width: 32px;
+  height: 32px;
 }

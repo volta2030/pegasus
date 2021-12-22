@@ -1,33 +1,60 @@
 const { ipcRenderer } = require("electron");
-const fs = require("fs");
 const sharp = require("sharp");
 
 var filepath = null;
+var buffer = null;
 
-document.getElementById("resizeBtn").addEventListener("click", (event) => {
-  if (filepath !== null) {
-    ipcRenderer.send("resizeImgREQ");
-  }
+["resizeBtn", "blurBtn", "rotateBtn"].forEach((item, index, arr) => {
+  document.getElementById(item).addEventListener("click", (event) => {
+    if (filepath !== null) {
+      ipcRenderer.send(`${item.replace("Btn", "")}ImgREQ`);
+    }
+  });
 });
 
 ipcRenderer.send("showMenuREQ", "ping");
 
 ipcRenderer.on("openImageCMD", (event, res) => {
   document.getElementById("previewImg").src = filepath = res;
+  sharp(filepath).toBuffer((err, buf, info) => {
+    buffer = buf;
+  });
 });
 
-ipcRenderer.on("resizeImageCMD", (event, res) => {
-  sharp(filepath)
+ipcRenderer.on("resizeImgCMD", (event, res) => {
+  sharp(buffer)
     .resize({ width: document.getElementById("previewImg").width * res })
-    .toBuffer((err, buffer, info) => {
-      // console.log(buffer);
-      document.getElementById("previewImg").src =
-        "data:image/png;base64, " + buffer.toString("base64");
+    .toBuffer((err, buf, info) => {
+      updatePreviewImg(buf);
+      buffer = buf;
     });
+});
 
-  // .toFile("./output.png", () => {
-  // document.getElementById("previewImg").src = "./output.png";
-  // });
+ipcRenderer.on("blurImgCMD", (event, res) => {
+  sharp(buffer)
+    .blur(res)
+    .toBuffer((err, buf, info) => {
+      updatePreviewImg(buf);
+      buffer = buf;
+    });
+});
+
+ipcRenderer.on("rotateRightImgCMD", (event) => {
+  sharp(buffer)
+    .rotate(90)
+    .toBuffer((err, buf, info) => {
+      updatePreviewImg(buf);
+      buffer = buf;
+    });
+});
+
+ipcRenderer.on("rotateLeftImgCMD", (event) => {
+  sharp(buffer)
+    .rotate(-90)
+    .toBuffer((err, buf, info) => {
+      updatePreviewImg(buf);
+      buffer = buf;
+    });
 });
 
 ipcRenderer.on("saveImageCMD", (event, res) => {
@@ -53,6 +80,7 @@ ipcRenderer.on("saveImageCMD", (event, res) => {
   }
 });
 
-// document.getElementById("clickBtn").addEventListener("click", () => {
-//   console.log("hello");
-// });
+function updatePreviewImg(buf) {
+  document.getElementById("previewImg").src =
+    "data:image/png;base64, " + buf.toString("base64");
+}
