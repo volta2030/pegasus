@@ -3,6 +3,7 @@ const sharp = require("sharp");
 
 var filepath = null;
 var buffer = null;
+var extension = null;
 
 ["resizeBtn", "blurBtn", "rotateBtn"].forEach((item, index, arr) => {
   document.getElementById(item).addEventListener("click", (event) => {
@@ -16,6 +17,7 @@ ipcRenderer.send("showMenuREQ", "ping");
 
 ipcRenderer.on("openImageCMD", (event, res) => {
   document.getElementById("previewImg").src = filepath = res;
+  extension = getExtension(filepath);
   sharp(filepath).toBuffer((err, buf, info) => {
     buffer = buf;
   });
@@ -59,7 +61,7 @@ ipcRenderer.on("rotateLeftImgCMD", (event) => {
 
 ipcRenderer.on("saveImageCMD", (event, res) => {
   var base64Data = document.getElementById("previewImg").src;
-
+  console.log(res);
   if (!base64Data.includes("base64")) {
     sharp(filepath).toFile(res, (err) => {
       if (err) {
@@ -69,7 +71,8 @@ ipcRenderer.on("saveImageCMD", (event, res) => {
       }
     });
   } else {
-    base64Data = base64Data.replace("data:image/png;base64", "");
+    base64Data = base64Data.replace(`data:image/${extension};base64`, "");
+    res = extension === "jpg" ? res.replace(".png", ".jpg") : res;
     require("fs").writeFile(res, base64Data, "base64", (err) => {
       if (err) {
         console.log("failed to save");
@@ -80,7 +83,11 @@ ipcRenderer.on("saveImageCMD", (event, res) => {
   }
 });
 
+function getExtension(filepath) {
+  return filepath.includes(".jpg") ? "jpg" : "png";
+}
+
 function updatePreviewImg(buf) {
   document.getElementById("previewImg").src =
-    "data:image/png;base64, " + buf.toString("base64");
+    `data:image/${extension};base64, ` + buf.toString("base64");
 }

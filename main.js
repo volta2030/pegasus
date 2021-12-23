@@ -110,7 +110,7 @@ app.whenReady().then(() => {
               dialog
                 .showOpenDialog({
                   properties: ["openFile"],
-                  filters: [{ name: "Images", extensions: ["png"] }],
+                  filters: [{ name: "Images", extensions: ["png", "jpg"] }],
                 })
                 .then((result) => {
                   event.sender.send("openImageCMD", result.filePaths[0]);
@@ -123,7 +123,7 @@ app.whenReady().then(() => {
               dialog
                 .showSaveDialog({
                   title: "Save image",
-                  filters: [{ name: "Png file", extensions: ["png"] }],
+                  filters: [{ name: "Image file", extensions: ["png", "jpg"] }],
                 })
                 .then((result) => {
                   event.sender.send("saveImageCMD", result.filePath);
