@@ -5,6 +5,8 @@ var filepath = null;
 var buffer = null;
 var extension = null;
 
+var imgInfoText = document.getElementById("imgInfoText");
+
 ["resizeBtn", "blurBtn", "rotateBtn"].forEach((item, index, arr) => {
   document.getElementById(item).addEventListener("click", (event) => {
     if (filepath !== null) {
@@ -20,6 +22,7 @@ ipcRenderer.on("openImageCMD", (event, res) => {
   extension = getExtension(filepath);
   sharp(filepath).toBuffer((err, buf, info) => {
     buffer = buf;
+    updateImgInfoText(info);
   });
 });
 
@@ -28,7 +31,7 @@ ipcRenderer.on("resizeImgCMD", (event, res) => {
     .resize({ width: document.getElementById("previewImg").width * res })
     .toBuffer((err, buf, info) => {
       updatePreviewImg(buf);
-      buffer = buf;
+      updateImgInfoText(info);
     });
 });
 
@@ -37,7 +40,6 @@ ipcRenderer.on("blurImgCMD", (event, res) => {
     .blur(res)
     .toBuffer((err, buf, info) => {
       updatePreviewImg(buf);
-      buffer = buf;
     });
 });
 
@@ -46,7 +48,7 @@ ipcRenderer.on("rotateRightImgCMD", (event) => {
     .rotate(90)
     .toBuffer((err, buf, info) => {
       updatePreviewImg(buf);
-      buffer = buf;
+      updateImgInfoText(info);
     });
 });
 
@@ -55,7 +57,23 @@ ipcRenderer.on("rotateLeftImgCMD", (event) => {
     .rotate(-90)
     .toBuffer((err, buf, info) => {
       updatePreviewImg(buf);
-      buffer = buf;
+      updateImgInfoText(info);
+    });
+});
+
+ipcRenderer.on("flipImgCMD", (event) => {
+  sharp(buffer)
+    .flip()
+    .toBuffer((err, buf, info) => {
+      updatePreviewImg(buf);
+    });
+});
+
+ipcRenderer.on("flopImgCMD", (event) => {
+  sharp(buffer)
+    .flop()
+    .toBuffer((err, buf, info) => {
+      updatePreviewImg(buf);
     });
 });
 
@@ -90,4 +108,10 @@ function getExtension(filepath) {
 function updatePreviewImg(buf) {
   document.getElementById("previewImg").src =
     `data:image/${extension};base64, ` + buf.toString("base64");
+
+  buffer = buf;
+}
+
+function updateImgInfoText(info) {
+  imgInfoText.innerText = `${info.width} x ${info.height}`;
 }

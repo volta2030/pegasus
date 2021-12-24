@@ -1,4 +1,5 @@
 @import "./reset.css";
+@import "./variable.css";
 
 body {
   width: 100vw;
@@ -19,9 +20,17 @@ body {
   position: fixed;
   top: 0px;
   left: 0px;
+  display: flex;
+}
+
+#imgInfoText {
+  text-align: right;
+  margin-top: 3px;
+  color: rgba(0, 0, 0, 0.5);
 }
 
 #previewImg {
+  background-color: white;
+  box-shadow: var(--main-shadow);
   position: inherit;
-  /* border: 1px rgba(0, 0, 0, 0.3) solid; */
 }

@@ -46,6 +46,7 @@ function createView(type, mainWindow) {
   view.setBounds({ x: 0, y: 32, width: 1280, height: 100 });
   view.setAutoResize({ width: true, height: false });
   view.webContents.loadFile(`./pages/_panel.html`);
+
   // view.webContents.openDevTools();
 }
 
@@ -53,6 +54,7 @@ function createView(type, mainWindow) {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  Menu.setApplicationMenu(null);
   const mainWindow = new BrowserWindow({
     width: 1280,
     height: 1024,
@@ -67,7 +69,6 @@ app.whenReady().then(() => {
     },
   });
 
-  // and load the index.html of the app.
   mainWindow.loadFile("index.html");
   // Open the DevTools.(only develop)
   // mainWindow.webContents.openDevTools();
@@ -96,6 +97,14 @@ app.whenReady().then(() => {
 
   ipcMain.on("rotateRightImgREQ", (event) => {
     mainWindow.webContents.send("rotateRightImgCMD");
+  });
+
+  ipcMain.on("flipImgREQ", (event) => {
+    mainWindow.webContents.send("flipImgCMD");
+  });
+
+  ipcMain.on("flopImgREQ", (event) => {
+    mainWindow.webContents.send("flopImgCMD");
   });
 
   // main
