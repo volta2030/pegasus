@@ -23,6 +23,28 @@ body {
   display: flex;
 }
 
+#imgPanel {
+  position: relative;
+}
+
+.colorBox {
+  width: 24px;
+  height: 24px;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+#mainColorBox {
+  width: 24px;
+  height: 85px;
+  position: absolute;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  right: -28px;
+  top: 0px;
+}
+
 #imgInfoText {
   text-align: right;
   margin-top: 3px;

@@ -7,6 +7,7 @@ var extension = null;
 
 var imgInfoText = document.getElementById("imgInfoText");
 
+
 ["resizeBtn", "blurBtn", "rotateBtn"].forEach((item, index, arr) => {
   document.getElementById(item).addEventListener("click", (event) => {
     if (filepath !== null) {
@@ -17,13 +18,15 @@ var imgInfoText = document.getElementById("imgInfoText");
 
 ipcRenderer.send("showMenuREQ", "ping");
 
-ipcRenderer.on("openImageCMD", (event, res) => {
+ipcRenderer.on("openImgCMD", (event, res) => {
   document.getElementById("previewImg").src = filepath = res;
   extension = getExtension(filepath);
   sharp(filepath).toBuffer((err, buf, info) => {
-    buffer = buf;
-    updateImgInfoText(info);
-  });
+  buffer = buf;  
+  extractMainColors(buffer);
+  updateImgInfoText(info);
+
+  })
 });
 
 ipcRenderer.on("resizeImgCMD", (event, res) => {
@@ -77,7 +80,7 @@ ipcRenderer.on("flopImgCMD", (event) => {
     });
 });
 
-ipcRenderer.on("saveImageCMD", (event, res) => {
+ipcRenderer.on("saveImgCMD", (event, res) => {
   var base64Data = document.getElementById("previewImg").src;
   console.log(res);
   if (!base64Data.includes("base64")) {
@@ -114,4 +117,48 @@ function updatePreviewImg(buf) {
 
 function updateImgInfoText(info) {
   imgInfoText.innerText = `${info.width} x ${info.height}`;
+}
+
+function extractMainColors(buffer){
+  sharp(buffer).resize({width:32}).toColorspace('srgb').raw().toBuffer((err, result, info)=>{
+      
+    var colors ={}
+    var step;
+    var coef = info.width * info.height * 4 ===result.length ? 4 : 3;
+    var size = result.length/coef;
+    // if( info.width * info.height * 4 ===buffer.length) coef = 4;
+    // else{coef = 3;}
+    // console.log(coef);
+
+    for (step = 0; step < size; step++) {
+      // Runs 5 times, with values of step 0 through 4.
+      
+      if( colors[`${result[coef*step]} ${result[coef*step+1]} ${result[coef*step+2]}`] !== undefined){
+        colors[`${result[coef*step]} ${result[coef*step+1]} ${result[coef*step+2]}`] += 1;
+      }else{
+        colors[`${result[coef*step]} ${result[coef*step+1]} ${result[coef*step+2]}`] = 1;
+      }
+     
+    }
+    const sortColors = Object.entries(colors)
+    .sort(([, a], [, b]) => b - a)
+    .reduce((r, [k, v]) => ({ ...r, [k]: v }), {});
+
+    console.log(sortColors);
+
+    var rgb = Object.keys(sortColors)[0].split(" ");
+    var hexColor = `#${parseInt( rgb[0] , 10 ).toString( 16 ).padStart(2,"0") +  parseInt( rgb[1], 10 ).toString( 16 ).padStart(2,"0") + parseInt( rgb[2], 10 ).toString( 16 ).padStart(2,"0")}`;
+    document.getElementById('mainColor1').style.background = hexColor;
+    document.getElementById('mainColor1').title = hexColor;
+    // console.log(`#${parseInt( rgb[0] , 10 ).toString( 16 ).padStart(2,"0") +  parseInt( rgb[1], 10 ).toString( 16 ).padStart(2,"0") + parseInt( rgb[2], 10 ).toString( 16 ).padStart(2,"0")}`);
+    rgb = Object.keys(sortColors)[1].split(" ");
+    hexColor = `#${parseInt( rgb[0] , 10 ).toString( 16 ).padStart(2,"0") +  parseInt( rgb[1], 10 ).toString( 16 ).padStart(2,"0") + parseInt( rgb[2], 10 ).toString( 16 ).padStart(2,"0")}`;
+    document.getElementById('mainColor2').style.background = hexColor;
+    document.getElementById('mainColor2').title = hexColor;
+    //
+    rgb = Object.keys(sortColors)[2].split(" ");
+    hexColor = `#${parseInt( rgb[0] , 10 ).toString( 16 ).padStart(2,"0") +  parseInt( rgb[1], 10 ).toString( 16 ).padStart(2,"0") + parseInt( rgb[2], 10 ).toString( 16 ).padStart(2,"0")}`;
+    document.getElementById('mainColor3').style.background = hexColor;
+    document.getElementById('mainColor3').title = hexColor;    
+  });
 }

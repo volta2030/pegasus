@@ -122,7 +122,7 @@ app.whenReady().then(() => {
                   filters: [{ name: "Images", extensions: ["png", "jpg"] }],
                 })
                 .then((result) => {
-                  event.sender.send("openImageCMD", result.filePaths[0]);
+                  event.sender.send("openImgCMD", result.filePaths[0]);
                 });
             },
           },
@@ -135,7 +135,7 @@ app.whenReady().then(() => {
                   filters: [{ name: "Image file", extensions: ["png", "jpg"] }],
                 })
                 .then((result) => {
-                  event.sender.send("saveImageCMD", result.filePath);
+                  event.sender.send("saveImgCMD", result.filePath);
                 });
             },
           },
