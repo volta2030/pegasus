@@ -73,15 +73,17 @@ app.whenReady().then(() => {
   // Open the DevTools.(only develop)
   // mainWindow.webContents.openDevTools();
 
-  ["resizeImgREQ", "blurImgREQ", "rotateImgREQ"].forEach((item, index, arr) => {
-    ipcMain.on(item, (event) => {
-      mainWindow
-        .getBrowserView()
-        .webContents.loadFile(
-          `./pages/${item.replace("ImgREQ", "")}_panel.html`
-        );
-    });
-  });
+  ["resizeImgREQ", "blurImgREQ", "sharpenImgREQ", "rotateImgREQ"].forEach(
+    (item, index, arr) => {
+      ipcMain.on(item, (event) => {
+        mainWindow
+          .getBrowserView()
+          .webContents.loadFile(
+            `./pages/${item.replace("ImgREQ", "")}_panel.html`
+          );
+      });
+    }
+  );
 
   ipcMain.on("resizeValueSEND", (event, res) => {
     mainWindow.webContents.send("resizeImgCMD", res);
@@ -89,6 +91,10 @@ app.whenReady().then(() => {
 
   ipcMain.on("blurValueSEND", (event, res) => {
     mainWindow.webContents.send("blurImgCMD", res);
+  });
+
+  ipcMain.on("sharpenValueSEND", (event, res) => {
+    mainWindow.webContents.send("sharpenImgCMD", res);
   });
 
   ipcMain.on("rotateLeftImgREQ", (event) => {
@@ -119,7 +125,12 @@ app.whenReady().then(() => {
               dialog
                 .showOpenDialog({
                   properties: ["openFile"],
-                  filters: [{ name: "Images", extensions: ["png", "jpg"] }],
+                  filters: [
+                    {
+                      name: "Image file",
+                      extensions: ["png", "jpg", "jpeg", "gif", "webp"],
+                    },
+                  ],
                 })
                 .then((result) => {
                   event.sender.send("openImgCMD", result.filePaths[0]);
@@ -132,7 +143,12 @@ app.whenReady().then(() => {
               dialog
                 .showSaveDialog({
                   title: "Save image",
-                  filters: [{ name: "Image file", extensions: ["png", "jpg"] }],
+                  filters: [
+                    {
+                      name: "Image file",
+                      extensions: ["png", "jpg", "jpeg", "gif", "webp"],
+                    },
+                  ],
                 })
                 .then((result) => {
                   event.sender.send("saveImgCMD", result.filePath);

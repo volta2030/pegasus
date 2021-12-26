@@ -6,6 +6,5 @@ document.getElementById("blurValue").addEventListener("input", (event) => {
 });
 
 document.getElementById("blurExecuteBtn").addEventListener("click", (event) => {
-  console.log("hellow");
   ipcRenderer.send("blurValueSEND", Number(scale));
 });

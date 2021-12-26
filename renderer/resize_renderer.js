@@ -1,4 +1,5 @@
 const { ipcRenderer } = require("electron");
+
 var scale = 2;
 
 document.getElementById("resizeValue").addEventListener("input", (event) => {
