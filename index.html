@@ -12,7 +12,7 @@
       content="default-src 'none'; connect-src 'self';font-src 'self'; img-src 'self' data: https:; style-src 'self' ; script-src 'self'"
     />
     <link href="./css/styles.css" rel="stylesheet" />
-    <title>Pegasus - Image Processing Tool</title>
+    <title>pegasus - Image Processing Tool</title>
   </head>
 
   <body>
@@ -34,14 +34,23 @@
     </div>
     
     <div id="imgPanel">
-      <img id="previewImg" />
+      <img id="previewImg" draggable="true" src="./assets/addImage.png"/>
       <div id="mainColorBox">
         <div class="colorBox" id="mainColor1" title="empty"></div>
         <div class="colorBox" id="mainColor2" title="empty"></div>
         <div class="colorBox" id="mainColor3" title="empty"></div>
       </div>
       <h2 id="imgInfoText"></h2>
+      <select id="extensionComboBox">
+        <option value="default"></option>
+        <option value="png">png</option>
+        <option value="jpg">jpg</option>
+        <option value="jpeg">jpeg</option>
+        <option value="webp">webp</option>
+      </select>
     </div>
+
+    <div id="alert-box">Convert Successfully</div>
 
     <script src="./renderer/main_renderer.js"></script>
   </body>

@@ -1,6 +1,7 @@
 const { ipcRenderer } = require("electron");
 const sharp = require("sharp");
 var path = require("path");
+
 var filepath = null;
 var buffer = null;
 var extension = null;
@@ -21,17 +22,16 @@ ipcRenderer.send("showMenuREQ", "ping");
 
 ipcRenderer.on("openImgCMD", (event, res) => {
   try {
-    document.getElementById("previewImg").src = filepath = res;
+    filepath = res;
     extension = path.extname(filepath).replace(".", "");
-    sharp(filepath).toBuffer((err, buf, info) => {
-      buffer = buf;
-      extractMainColors(buffer, info);
-      updateImgInfoText(info);
-    });
+    openImg(filepath, extension);
   } catch (error) {
-    filepath = null;
-    extension = null;
-    buffer = null;
+    if (filepath === null) {
+      document.getElementById("previewImg").src = "./assets/addImage.png";
+      filepath = null;
+      extension = null;
+      buffer = null;
+    }
   }
 });
 
@@ -128,6 +128,61 @@ function updateImgInfoText(info) {
   imgInfoText.innerText = `${info.width} x ${info.height}`;
 }
 
+document
+  .getElementById("previewImg")
+  .addEventListener("drag", function (event) {}, false);
+
+document.getElementById("previewImg").addEventListener(
+  "dragover",
+  function (event) {
+    event.preventDefault();
+  },
+  false
+);
+
+document.getElementById("previewImg").addEventListener(
+  "drop",
+  function (event) {
+    event.preventDefault();
+    filepath = event.dataTransfer.files[0].path;
+    extension = path.extname(filepath).replace(".", "");
+    openImg(filepath, extension);
+  },
+  false
+);
+
+document
+  .getElementById("extensionComboBox")
+  .addEventListener("change", (event) => {
+    extension = event.target.value;
+    sharp(buffer)
+      .toFormat(extension)
+      .toBuffer((err, buf, info) => {
+        buffer = buf;
+        updatePreviewImg(buf);
+        document
+          .getElementById("alert-box")
+          .animate([{ opacity: "1" }, { opacity: "0" }], {
+            duration: 1800,
+            iterations: 1,
+          });
+      });
+  });
+
+function openImg(filepath, extension) {
+  sharp(filepath).toBuffer((err, buf, info) => {
+    buffer = buf;
+    extractMainColors(buf, info);
+    updatePreviewImg(buf);
+    updateImgInfoText(info);
+    updateExtension(extension);
+  });
+}
+
+function updateExtension(extension) {
+  document.getElementById("extensionComboBox").value = extension;
+}
+
 function extractMainColors(buffer, info) {
   sharp(buffer)
     .resize({ width: info.width > 32 ? 32 : info.width })
@@ -138,9 +193,6 @@ function extractMainColors(buffer, info) {
       var step;
       var coef = info.width * info.height * 4 === result.length ? 4 : 3;
       var size = result.length / coef;
-      // if( info.width * info.height * 4 ===buffer.length) coef = 4;
-      // else{coef = 3;}
-      // console.log(coef);
 
       for (step = 0; step < size; step++) {
         // Runs 5 times, with values of step 0 through 4.

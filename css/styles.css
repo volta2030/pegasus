@@ -33,6 +33,16 @@ body {
   border: 1px solid rgba(0, 0, 0, 0.3);
 }
 
+select#extensionComboBox {
+  border: none;
+  position: absolute;
+  color: rgba(0, 0, 0, 0.8);
+  bottom: 0px;
+  left: 0px;
+  font-size: 15px;
+  background: none;
+}
+
 #mainColorBox {
   width: 24px;
   height: 86px;
@@ -52,7 +62,19 @@ body {
 }
 
 #previewImg {
-  background-color: white;
+  /* background-color: white; */
   box-shadow: var(--main-shadow);
   position: inherit;
+}
+
+#alert-box {
+  width: 400px;
+  padding: 15px;
+  opacity: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background-color: #dff0d8;
+  position: fixed;
+  bottom: 15px;
+  text-align: center;
 }
