@@ -73,44 +73,60 @@ app.whenReady().then(() => {
   // Open the DevTools.(only develop)
   // mainWindow.webContents.openDevTools();
 
-  ["resizeImgREQ", "blurImgREQ", "sharpenImgREQ", "rotateImgREQ"].forEach(
-    (item, index, arr) => {
-      ipcMain.on(item, (event) => {
-        mainWindow
-          .getBrowserView()
-          .webContents.loadFile(
-            `./pages/${item.replace("ImgREQ", "")}_panel.html`
-          );
-      });
-    }
-  );
+  [
+    "resizeImgREQ",
+    "blurImgREQ",
+    "sharpenImgREQ",
+    "rotateImgREQ",
+    "paintImgREQ",
+  ].forEach((item, index, arr) => {
+    ipcMain.on(item, (event) => {
+      mainWindow
+        .getBrowserView()
+        .webContents.loadFile(
+          `./pages/${item.replace("ImgREQ", "")}_panel.html`
+        );
+    });
+  });
 
   ipcMain.on("resizeValueSEND", (event, res) => {
     mainWindow.webContents.send("resizeImgCMD", res);
+    mainWindow.webContents.focus();
   });
 
   ipcMain.on("blurValueSEND", (event, res) => {
     mainWindow.webContents.send("blurImgCMD", res);
+    mainWindow.webContents.focus();
   });
 
   ipcMain.on("sharpenValueSEND", (event, res) => {
     mainWindow.webContents.send("sharpenImgCMD", res);
+    mainWindow.webContents.focus();
   });
 
   ipcMain.on("rotateLeftImgREQ", (event) => {
     mainWindow.webContents.send("rotateLeftImgCMD");
+    mainWindow.webContents.focus();
   });
 
   ipcMain.on("rotateRightImgREQ", (event) => {
     mainWindow.webContents.send("rotateRightImgCMD");
+    mainWindow.webContents.focus();
   });
 
   ipcMain.on("flipImgREQ", (event) => {
     mainWindow.webContents.send("flipImgCMD");
+    mainWindow.webContents.focus();
   });
 
   ipcMain.on("flopImgREQ", (event) => {
     mainWindow.webContents.send("flopImgCMD");
+    mainWindow.webContents.focus();
+  });
+
+  ipcMain.on("grayScaleImgREQ", (event) => {
+    mainWindow.webContents.send("grayScaleImgCMD");
+    mainWindow.webContents.focus();
   });
 
   // main
