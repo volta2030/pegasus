@@ -104,6 +104,16 @@ app.whenReady().then(() => {
     mainWindow.webContents.focus();
   });
 
+  ipcMain.on("rotateValueSEND", (event, res) => {
+    mainWindow.webContents.send("rotateImgCMD", res);
+    mainWindow.webContents.focus();
+  });
+
+  ipcMain.on("tintValueSEND", (event, res) => {
+    mainWindow.webContents.send("tintImgCMD", res);
+    mainWindow.webContents.focus();
+  });
+
   ipcMain.on("rotateLeftImgREQ", (event) => {
     mainWindow.webContents.send("rotateLeftImgCMD");
     mainWindow.webContents.focus();

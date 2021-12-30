@@ -1,5 +1,7 @@
 const { ipcRenderer } = require("electron");
 
+var degree = 45;
+
 document.getElementById("flipBtn").addEventListener("click", () => {
   ipcRenderer.send("flipImgREQ");
 });
@@ -14,4 +16,12 @@ document.getElementById("rotateLeftBtn").addEventListener("click", () => {
 
 document.getElementById("rotateRightBtn").addEventListener("click", () => {
   ipcRenderer.send("rotateRightImgREQ");
+});
+
+document.getElementById("rotateValue").addEventListener("input", (event) => {
+  degree = event.target.value;
+});
+
+document.getElementById("rotateExecuteBtn").addEventListener("click", () => {
+  ipcRenderer.send("rotateValueSEND", degree);
 });

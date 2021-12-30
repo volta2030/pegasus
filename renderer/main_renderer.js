@@ -1,6 +1,7 @@
 const { ipcRenderer } = require("electron");
 const sharp = require("sharp");
 var path = require("path");
+const colour = require("sharp/lib/colour");
 
 var filepath = null;
 var buffer = null;
@@ -57,6 +58,14 @@ ipcRenderer.on("sharpenImgCMD", (event, res) => {
     });
 });
 
+ipcRenderer.on("rotateImgCMD", (event, res) => {
+  sharp(buffer)
+    .rotate(res)
+    .toBuffer((err, buf, info) => {
+      updatePreviewImg(buf, info, extension);
+    });
+});
+
 ipcRenderer.on("rotateRightImgCMD", (event) => {
   sharp(buffer)
     .rotate(90)
@@ -92,6 +101,14 @@ ipcRenderer.on("flopImgCMD", (event) => {
 ipcRenderer.on("grayScaleImgCMD", (event) => {
   sharp(buffer)
     .grayscale(true)
+    .toBuffer((err, buf, info) => {
+      updatePreviewImg(buf, info, extension);
+    });
+});
+
+ipcRenderer.on("tintImgCMD", (event, res) => {
+  sharp(buffer)
+    .tint(res)
     .toBuffer((err, buf, info) => {
       updatePreviewImg(buf, info, extension);
     });
