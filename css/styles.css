@@ -67,7 +67,7 @@ select#extensionComboBox {
   position: inherit;
 }
 
-#alert-box {
+.alert-box {
   width: 400px;
   padding: 15px;
   opacity: 0;

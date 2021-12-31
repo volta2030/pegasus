@@ -171,13 +171,61 @@ document
         buffer = buf;
         updatePreviewImg(buf, info, extension);
         document
-          .getElementById("alert-box")
+          .getElementById("convert_msg")
           .animate([{ opacity: "1" }, { opacity: "0" }], {
             duration: 1800,
             iterations: 1,
           });
       });
   });
+
+document.getElementById("mainColor1").addEventListener("click", (event) => {
+  const text = document.createElement("textarea");
+  document.body.appendChild(text);
+  text.value = document.getElementById("mainColor1").title;
+  text.select();
+  document.execCommand("Copy");
+  document.body.removeChild(text);
+
+  document
+    .getElementById("copy_msg")
+    .animate([{ opacity: "1" }, { opacity: "0" }], {
+      duration: 1800,
+      iterations: 1,
+    });
+});
+
+document.getElementById("mainColor2").addEventListener("click", (event) => {
+  const text = document.createElement("textarea");
+  document.body.appendChild(text);
+  text.value = document.getElementById("mainColor2").title;
+  text.select();
+  document.execCommand("Copy");
+  document.body.removeChild(text);
+
+  document
+    .getElementById("copy_msg")
+    .animate([{ opacity: "1" }, { opacity: "0" }], {
+      duration: 1800,
+      iterations: 1,
+    });
+});
+
+document.getElementById("mainColor3").addEventListener("click", (event) => {
+  const text = document.createElement("textarea");
+  document.body.appendChild(text);
+  text.value = document.getElementById("mainColor3").title;
+  text.select();
+  document.execCommand("Copy");
+  document.body.removeChild(text);
+
+  document
+    .getElementById("copy_msg")
+    .animate([{ opacity: "1" }, { opacity: "0" }], {
+      duration: 1800,
+      iterations: 1,
+    });
+});
 
 document.addEventListener("keydown", function (event) {
   if (event.ctrlKey && event.key === "z") {
