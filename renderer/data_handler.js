@@ -88,7 +88,7 @@ function redoPreviewImg() {
 
 function extractMainColors(buffer, info) {
   sharp(buffer)
-    .resize({ width: info.width > 16 ? 16 : info.width })
+    .resize({ width: info.width > 24 ? 24 : info.width })
     .toColorspace("srgb")
     .raw()
     .toBuffer((err, result, info) => {

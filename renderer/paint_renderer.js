@@ -10,6 +10,10 @@ document.getElementById("tintExecuteBtn").addEventListener("click", () => {
   ipcRenderer.send("tintValueSEND", rgb);
 });
 
+document.getElementById("normalizeBtn").addEventListener("click", () => {
+  ipcRenderer.send("normalizeImgREQ");
+});
+
 document.getElementById("redValue").addEventListener("input", (event) => {
   rgb.r = event.target.value; //parseInt(event.target.value, 10).toString(16).padStart(2, "0");
   updateTintBtnBackground(rgb);

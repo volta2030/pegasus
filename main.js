@@ -43,7 +43,7 @@ function createView(type, mainWindow) {
     },
   });
   mainWindow.setBrowserView(view);
-  view.setBounds({ x: 0, y: 32, width: 1280, height: 100 });
+  view.setBounds({ x: 0, y: 32, width: 1280, height: 90 });
   view.setAutoResize({ width: true, height: false });
   view.webContents.loadFile(`./pages/_panel.html`);
 
@@ -71,12 +71,11 @@ app.whenReady().then(() => {
 
   mainWindow.loadFile("index.html");
   // Open the DevTools.(only develop)
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 
   [
     "resizeImgREQ",
-    "blurImgREQ",
-    "sharpenImgREQ",
+    "filterImgREQ",
     "rotateImgREQ",
     "paintImgREQ",
   ].forEach((item, index, arr) => {
@@ -103,6 +102,16 @@ app.whenReady().then(() => {
     mainWindow.webContents.send("sharpenImgCMD", res);
     mainWindow.webContents.focus();
   });
+
+  ipcMain.on("normalizeImgREQ", (event)=>{
+    mainWindow.webContents.send("normalizeImgCMD");
+    mainWindow.webContents.focus();
+  })
+
+  ipcMain.on("medianValueSEND", (event, res)=>{
+    mainWindow.webContents.send("medianImgCMD", res);
+    mainWindow.webContents.focus();
+  })
 
   ipcMain.on("rotateValueSEND", (event, res) => {
     mainWindow.webContents.send("rotateImgCMD", res);

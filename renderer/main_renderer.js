@@ -7,7 +7,7 @@ var filepath = null;
 var buffer = null;
 var extension = null;
 
-["resizeBtn", "blurBtn", "sharpenBtn", "rotateBtn", "paintBtn"].forEach(
+["resizeBtn", "filterBtn", "rotateBtn", "paintBtn"].forEach(
   (item, index, arr) => {
     document.getElementById(item).addEventListener("click", (event) => {
       if (filepath !== null) {
@@ -57,6 +57,18 @@ ipcRenderer.on("sharpenImgCMD", (event, res) => {
       updatePreviewImg(buf, info, extension);
     });
 });
+
+ipcRenderer.on("normalizeImgCMD", (event)=>{
+  sharp(buffer).normalize(true).toBuffer((err, buf, info)=>{
+    updatePreviewImg(buf, info, extension);
+  });
+});
+
+ipcRenderer.on("medianImgCMD", (event, res)=>{
+  sharp(buffer).median(res).toBuffer((err, buf, info)=>{
+    updatePreviewImg(buf, info, extension);
+  })
+})
 
 ipcRenderer.on("rotateImgCMD", (event, res) => {
   sharp(buffer)
