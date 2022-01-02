@@ -67,6 +67,12 @@ select#extensionComboBox {
   position: inherit;
 }
 
+#cropBtn {
+  position: fixed;
+  top: 122px;
+  right: 0px;
+}
+
 .alert-box {
   width: 400px;
   padding: 15px;
