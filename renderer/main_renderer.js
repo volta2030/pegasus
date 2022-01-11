@@ -1,7 +1,6 @@
 const { ipcRenderer } = require("electron");
 const sharp = require("sharp");
 var path = require("path");
-const colour = require("sharp/lib/colour");
 
 var filepath = null;
 var buffer = null;
@@ -18,21 +17,6 @@ var extension = null;
 );
 
 ipcRenderer.send("showMenuREQ", "ping");
-
-ipcRenderer.on("openImgCMD", (event, res) => {
-  try {
-    filepath = res;
-    extension = path.extname(filepath).replace(".", "");
-    openImg(filepath, extension);
-  } catch (error) {
-    if (filepath === null) {
-      document.getElementById("previewImg").src = "./assets/addImage.png";
-      filepath = null;
-      extension = null;
-      buffer = null;
-    }
-  }
-});
 
 ipcRenderer.on("resizeImgCMD", (event, res) => {
   sharp(buffer)
@@ -58,17 +42,21 @@ ipcRenderer.on("sharpenImgCMD", (event, res) => {
     });
 });
 
-ipcRenderer.on("normalizeImgCMD", (event)=>{
-  sharp(buffer).normalize(true).toBuffer((err, buf, info)=>{
-    updatePreviewImg(buf, info, extension);
-  });
+ipcRenderer.on("normalizeImgCMD", (event) => {
+  sharp(buffer)
+    .normalize(true)
+    .toBuffer((err, buf, info) => {
+      updatePreviewImg(buf, info, extension);
+    });
 });
 
-ipcRenderer.on("medianImgCMD", (event, res)=>{
-  sharp(buffer).median(res).toBuffer((err, buf, info)=>{
-    updatePreviewImg(buf, info, extension);
-  })
-})
+ipcRenderer.on("medianImgCMD", (event, res) => {
+  sharp(buffer)
+    .median(res)
+    .toBuffer((err, buf, info) => {
+      updatePreviewImg(buf, info, extension);
+    });
+});
 
 ipcRenderer.on("rotateImgCMD", (event, res) => {
   sharp(buffer)
@@ -125,53 +113,6 @@ ipcRenderer.on("tintImgCMD", (event, res) => {
       updatePreviewImg(buf, info, extension);
     });
 });
-
-ipcRenderer.on("saveImgCMD", (event, res) => {
-  var base64Data = document.getElementById("previewImg").src;
-
-  if (!base64Data.includes("base64")) {
-    sharp(filepath).toFile(res.replace(".png", `.${extension}`), (err) => {
-      if (err) {
-        console.log("failed to save");
-      } else {
-        console.log("saved successfully");
-      }
-    });
-  } else {
-    base64Data = base64Data.replace(`data:image/${extension};base64`, "");
-    res = res.replace(".png", `.${extension}`);
-    require("fs").writeFile(res, base64Data, "base64", (err) => {
-      if (err) {
-        console.log("failed to save");
-      } else {
-        console.log("saved successfully");
-      }
-    });
-  }
-});
-
-document
-  .getElementById("previewImg")
-  .addEventListener("drag", function (event) {}, false);
-
-document.getElementById("previewImg").addEventListener(
-  "dragover",
-  function (event) {
-    event.preventDefault();
-  },
-  false
-);
-
-document.getElementById("previewImg").addEventListener(
-  "drop",
-  function (event) {
-    event.preventDefault();
-    filepath = event.dataTransfer.files[0].path;
-    extension = path.extname(filepath).replace(".", "");
-    openImg(filepath, extension);
-  },
-  false
-);
 
 document
   .getElementById("extensionComboBox")
@@ -239,10 +180,16 @@ document.getElementById("mainColor3").addEventListener("click", (event) => {
     });
 });
 
+// document.getElementById("cropBtn").addEventListener("click", (event) => {});
+
 document.addEventListener("keydown", function (event) {
   if (event.ctrlKey && event.key === "z") {
     undoPreviewImg();
   } else if (event.ctrlKey && event.key === "y") {
     redoPreviewImg();
+  } else if (event.which === 122) {
+    ipcRenderer.send("FullScreenREQ");
+  } else if (event.key === "Escape") {
+    ipcRenderer.send("DefaultScreenREQ");
   }
 });

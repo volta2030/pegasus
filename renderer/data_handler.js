@@ -1,8 +1,45 @@
+const { createBrotliCompress } = require("zlib");
+
 var bufferQueue = [];
 var infoQueue = [];
 var extensionQueue = [];
-
 var i = -1;
+
+var canvas = document.getElementById("previewImg");
+canvas.setAttribute("class", "img-canvas");
+var ctx = canvas.getContext("2d");
+const image = new Image();
+openImg("./assets/addImage.png", "png");
+
+ipcRenderer.on("openImgCMD", (event, res) => {
+  filepath = res;
+  if (filepath === undefined || filepath === null) {
+    openImg("./assets/addImage.png", "png");
+  } else {
+    extension = path.extname(filepath).replace(".", "");
+    openImg(filepath, extension);
+  }
+});
+
+ipcRenderer.on("setExtensionCMD", (event) => {
+  ipcRenderer.send("extensionValueSEND", extension);
+});
+
+ipcRenderer.on(
+  "saveImgCMD",
+  (event, res) => {
+    var base64Data = image.src.replace(`data:image/${extension};base64,`, "");
+    // console.log(base64Data);
+    require("fs").writeFile(res, base64Data, "base64", (err) => {
+      if (err) {
+        console.log("failed to save");
+      } else {
+        console.log("saved successfully");
+      }
+    });
+  }
+  // }
+);
 
 function openImg(filepath, extension) {
   sharp(filepath).toBuffer((err, buf, info) => {
@@ -11,8 +48,15 @@ function openImg(filepath, extension) {
 }
 
 function updatePreviewImg(buf, info, extension) {
-  document.getElementById("previewImg").src =
-    `data:image/${extension};base64, ` + buf.toString("base64");
+  canvas.width = info.width;
+  canvas.height = info.height;
+
+  image.src = `data:image/${extension};base64, ` + buf.toString("base64");
+  image.onload = () => {
+    ctx.drawImage(image, 0, 0, info.width, info.height);
+  };
+
+  // console.log(canvas.toDataURL());
 
   updateImgInfoText(info);
   extractMainColors(buf, info);
@@ -58,8 +102,14 @@ function undoPreviewImg() {
     info = infoQueue[i];
     extension = extensionQueue[i];
 
-    document.getElementById("previewImg").src =
-      `data:image/${extension};base64, ` + buffer.toString("base64");
+    canvas.width = infoQueue[i].width;
+    canvas.height = infoQueue[i].height;
+
+    const image = new Image();
+    image.src = `data:image/${extension};base64, ` + buffer.toString("base64");
+    image.onload = () => {
+      ctx.drawImage(image, 0, 0);
+    };
 
     updateImgInfoText(info);
     extractMainColors(buffer, info);
@@ -76,8 +126,15 @@ function redoPreviewImg() {
     info = infoQueue[i];
     extension = extensionQueue[i];
 
-    document.getElementById("previewImg").src =
-      `data:image/${extension};base64, ` + buffer.toString("base64");
+    canvas.width = infoQueue[i].width;
+    canvas.height = infoQueue[i].height;
+
+    const image = new Image();
+    image.src = `data:image/${extension};base64, ` + buffer.toString("base64");
+    image.onload = () => {
+      ctx.drawImage(image, 0, 0);
+    };
+
     extractMainColors(buffer, info);
     updateImgInfoText(info);
     updateExtension(extension);
@@ -87,6 +144,14 @@ function redoPreviewImg() {
 }
 
 function extractMainColors(buffer, info) {
+  //initialize
+  document.getElementById("mainColor1").style.background = null;
+  document.getElementById("mainColor1").title = "empty";
+  document.getElementById("mainColor2").style.background = null;
+  document.getElementById("mainColor2").title = "empty";
+  document.getElementById("mainColor3").style.background = null;
+  document.getElementById("mainColor3").title = "empty";
+
   sharp(buffer)
     .resize({ width: info.width > 24 ? 24 : info.width })
     .toColorspace("srgb")
@@ -154,3 +219,26 @@ function extractMainColors(buffer, info) {
       }
     });
 }
+
+document
+  .getElementById("previewImg")
+  .addEventListener("drag", function (event) {}, false);
+
+document.getElementById("previewImg").addEventListener(
+  "dragover",
+  function (event) {
+    event.preventDefault();
+  },
+  false
+);
+
+document.getElementById("previewImg").addEventListener(
+  "drop",
+  function (event) {
+    event.preventDefault();
+    filepath = event.dataTransfer.files[0]["path"];
+    extension = path.extname(filepath).replace(".", "");
+    openImg(filepath, extension);
+  },
+  false
+);

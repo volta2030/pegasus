@@ -73,20 +73,17 @@ app.whenReady().then(() => {
   // Open the DevTools.(only develop)
   // mainWindow.webContents.openDevTools();
 
-  [
-    "resizeImgREQ",
-    "filterImgREQ",
-    "rotateImgREQ",
-    "paintImgREQ",
-  ].forEach((item, index, arr) => {
-    ipcMain.on(item, (event) => {
-      mainWindow
-        .getBrowserView()
-        .webContents.loadFile(
-          `./pages/${item.replace("ImgREQ", "")}_panel.html`
-        );
-    });
-  });
+  ["resizeImgREQ", "filterImgREQ", "rotateImgREQ", "paintImgREQ"].forEach(
+    (item, index, arr) => {
+      ipcMain.on(item, (event) => {
+        mainWindow
+          .getBrowserView()
+          .webContents.loadFile(
+            `./pages/${item.replace("ImgREQ", "")}_panel.html`
+          );
+      });
+    }
+  );
 
   ipcMain.on("resizeValueSEND", (event, res) => {
     mainWindow.webContents.send("resizeImgCMD", res);
@@ -103,15 +100,15 @@ app.whenReady().then(() => {
     mainWindow.webContents.focus();
   });
 
-  ipcMain.on("normalizeImgREQ", (event)=>{
+  ipcMain.on("normalizeImgREQ", (event) => {
     mainWindow.webContents.send("normalizeImgCMD");
     mainWindow.webContents.focus();
-  })
+  });
 
-  ipcMain.on("medianValueSEND", (event, res)=>{
+  ipcMain.on("medianValueSEND", (event, res) => {
     mainWindow.webContents.send("medianImgCMD", res);
     mainWindow.webContents.focus();
-  })
+  });
 
   ipcMain.on("rotateValueSEND", (event, res) => {
     mainWindow.webContents.send("rotateImgCMD", res);
@@ -148,6 +145,33 @@ app.whenReady().then(() => {
     mainWindow.webContents.focus();
   });
 
+  ipcMain.on("FullScreenREQ", (event) => {
+    mainWindow.setSimpleFullScreen(true);
+    mainWindow.show();
+  });
+
+  ipcMain.on("DefaultScreenREQ", (event) => {
+    mainWindow.setSimpleFullScreen(false);
+    mainWindow.show();
+  });
+
+  ipcMain.on("extensionValueSEND", (event, res) => {
+    dialog
+      .showSaveDialog({
+        title: "Save image",
+        defaultPath: "~/image",
+        filters: [
+          {
+            name: "Image file",
+            extensions: [res],
+          },
+        ],
+      })
+      .then((result) => {
+        event.sender.send("saveImgCMD", result.filePath);
+      });
+  });
+
   // main
   ipcMain.on("showMenuREQ", (event) => {
     const template = [
@@ -163,7 +187,7 @@ app.whenReady().then(() => {
                   filters: [
                     {
                       name: "Image file",
-                      extensions: ["png", "jpg", "jpeg", "gif", "webp"],
+                      extensions: ["png", "jpg", "jpeg", "webp"],
                     },
                   ],
                 })
@@ -175,19 +199,7 @@ app.whenReady().then(() => {
           {
             label: "Save Image",
             click: () => {
-              dialog
-                .showSaveDialog({
-                  title: "Save image",
-                  filters: [
-                    {
-                      name: "Image file",
-                      extensions: ["png", "jpg", "jpeg", "gif", "webp"],
-                    },
-                  ],
-                })
-                .then((result) => {
-                  event.sender.send("saveImgCMD", result.filePath);
-                });
+              event.sender.send("setExtensionCMD");
             },
           },
         ],
