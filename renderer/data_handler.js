@@ -1,47 +1,35 @@
+const { createBrotliCompress } = require("zlib");
+
 var bufferQueue = [];
 var infoQueue = [];
 var extensionQueue = [];
-
 var i = -1;
 
 var canvas = document.getElementById("previewImg");
 canvas.setAttribute("class", "img-canvas");
-var ctx = canvas.getContext("2d"); 
+var ctx = canvas.getContext("2d");
+const image = new Image();
+openImg("./assets/addImage.png", "png");
 
 ipcRenderer.on("openImgCMD", (event, res) => {
-  try {
-    filepath = res;
+  filepath = res;
+  if (filepath === undefined || filepath === null) {
+    openImg("./assets/addImage.png", "png");
+  } else {
     extension = path.extname(filepath).replace(".", "");
     openImg(filepath, extension);
-  } catch (error) {
-    if (filepath === null) {
-
-      const image = new Image();
-      image.src = "../assets/addImage.png";
-      image.onload = () => {
-           ctx.drawImage(image, 0, 0);
-      }
-      filepath = null;
-      extension = null;
-      buffer = null;
-    }
   }
 });
 
-ipcRenderer.on("saveImgCMD", (event, res) => {
-  var base64Data = canvas.toDataURL();
+ipcRenderer.on("setExtensionCMD", (event) => {
+  ipcRenderer.send("extensionValueSEND", extension);
+});
 
-  if (!base64Data.includes("base64")) {
-    sharp(filepath).toFile(res.replace(".png", `.${extension}`), (err) => {
-      if (err) {
-        console.log("failed to save");
-      } else {
-        console.log("saved successfully");
-      }
-    });
-  } else {
-    base64Data = base64Data.replace(`data:image/${extension};base64`, "");
-    res = res.replace(".png", `.${extension}`);
+ipcRenderer.on(
+  "saveImgCMD",
+  (event, res) => {
+    var base64Data = image.src.replace(`data:image/${extension};base64,`, "");
+    // console.log(base64Data);
     require("fs").writeFile(res, base64Data, "base64", (err) => {
       if (err) {
         console.log("failed to save");
@@ -50,7 +38,8 @@ ipcRenderer.on("saveImgCMD", (event, res) => {
       }
     });
   }
-});
+  // }
+);
 
 function openImg(filepath, extension) {
   sharp(filepath).toBuffer((err, buf, info) => {
@@ -59,18 +48,15 @@ function openImg(filepath, extension) {
 }
 
 function updatePreviewImg(buf, info, extension) {
-
   canvas.width = info.width;
   canvas.height = info.height;
 
-  const image = new Image();
-  
   image.src = `data:image/${extension};base64, ` + buf.toString("base64");
   image.onload = () => {
-       ctx.drawImage(image, 0, 0);
-  }
+    ctx.drawImage(image, 0, 0, info.width, info.height);
+  };
 
-  console.log(canvas.toDataURL());
+  // console.log(canvas.toDataURL());
 
   updateImgInfoText(info);
   extractMainColors(buf, info);
@@ -120,10 +106,10 @@ function undoPreviewImg() {
     canvas.height = infoQueue[i].height;
 
     const image = new Image();
-    image.src = `data:image/${extension};base64, ` + bufferQueue[i].toString("base64");
+    image.src = `data:image/${extension};base64, ` + buffer.toString("base64");
     image.onload = () => {
-         ctx.drawImage(image, 0, 0)
-    }
+      ctx.drawImage(image, 0, 0);
+    };
 
     updateImgInfoText(info);
     extractMainColors(buffer, info);
@@ -144,10 +130,10 @@ function redoPreviewImg() {
     canvas.height = infoQueue[i].height;
 
     const image = new Image();
-    image.src = `data:image/${extension};base64, ` + bufferQueue[i].toString("base64");
+    image.src = `data:image/${extension};base64, ` + buffer.toString("base64");
     image.onload = () => {
-         ctx.drawImage(image, 0, 0)
-    }
+      ctx.drawImage(image, 0, 0);
+    };
 
     extractMainColors(buffer, info);
     updateImgInfoText(info);
@@ -158,6 +144,14 @@ function redoPreviewImg() {
 }
 
 function extractMainColors(buffer, info) {
+  //initialize
+  document.getElementById("mainColor1").style.background = null;
+  document.getElementById("mainColor1").title = "empty";
+  document.getElementById("mainColor2").style.background = null;
+  document.getElementById("mainColor2").title = "empty";
+  document.getElementById("mainColor3").style.background = null;
+  document.getElementById("mainColor3").title = "empty";
+
   sharp(buffer)
     .resize({ width: info.width > 24 ? 24 : info.width })
     .toColorspace("srgb")
@@ -242,7 +236,7 @@ document.getElementById("previewImg").addEventListener(
   "drop",
   function (event) {
     event.preventDefault();
-    filepath = event.dataTransfer.files[0].path;
+    filepath = event.dataTransfer.files[0]["path"];
     extension = path.extname(filepath).replace(".", "");
     openImg(filepath, extension);
   },

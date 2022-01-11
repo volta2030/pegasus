@@ -6,7 +6,6 @@ var filepath = null;
 var buffer = null;
 var extension = null;
 
-
 ["resizeBtn", "filterBtn", "rotateBtn", "paintBtn"].forEach(
   (item, index, arr) => {
     document.getElementById(item).addEventListener("click", (event) => {
@@ -43,17 +42,21 @@ ipcRenderer.on("sharpenImgCMD", (event, res) => {
     });
 });
 
-ipcRenderer.on("normalizeImgCMD", (event)=>{
-  sharp(buffer).normalize(true).toBuffer((err, buf, info)=>{
-    updatePreviewImg(buf, info, extension);
-  });
+ipcRenderer.on("normalizeImgCMD", (event) => {
+  sharp(buffer)
+    .normalize(true)
+    .toBuffer((err, buf, info) => {
+      updatePreviewImg(buf, info, extension);
+    });
 });
 
-ipcRenderer.on("medianImgCMD", (event, res)=>{
-  sharp(buffer).median(res).toBuffer((err, buf, info)=>{
-    updatePreviewImg(buf, info, extension);
-  })
-})
+ipcRenderer.on("medianImgCMD", (event, res) => {
+  sharp(buffer)
+    .median(res)
+    .toBuffer((err, buf, info) => {
+      updatePreviewImg(buf, info, extension);
+    });
+});
 
 ipcRenderer.on("rotateImgCMD", (event, res) => {
   sharp(buffer)
@@ -177,14 +180,16 @@ document.getElementById("mainColor3").addEventListener("click", (event) => {
     });
 });
 
-document.getElementById("cropBtn").addEventListener("click", (event)=>{
-  
-})
+// document.getElementById("cropBtn").addEventListener("click", (event) => {});
 
 document.addEventListener("keydown", function (event) {
   if (event.ctrlKey && event.key === "z") {
     undoPreviewImg();
   } else if (event.ctrlKey && event.key === "y") {
     redoPreviewImg();
+  } else if (event.which === 122) {
+    ipcRenderer.send("FullScreenREQ");
+  } else if (event.key === "Escape") {
+    ipcRenderer.send("DefaultScreenREQ");
   }
 });
