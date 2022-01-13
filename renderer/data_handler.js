@@ -12,7 +12,20 @@ var isDrag;
 
 var canvas = document.getElementById("previewImg");
 canvas.setAttribute("class", "img-canvas");
+var sioCheckBox = document.getElementById("showImageOnlyCheckBox");
 var ctx = canvas.getContext("2d");
+
+sioCheckBox.addEventListener("click", (event) => {
+  if (sioCheckBox.checked) {
+    document.getElementById("mainColorBox").style.visibility = "hidden";
+    document.getElementById("imgInfoText").style.visibility = "hidden";
+    document.getElementById("extensionComboBox").style.visibility = "hidden";
+  } else {
+    document.getElementById("mainColorBox").style.visibility = "visible";
+    document.getElementById("imgInfoText").style.visibility = "visible";
+    document.getElementById("extensionComboBox").style.visibility = "visible";
+  }
+});
 
 canvas.addEventListener("mousedown", (event) => {
   isDrag = true;
