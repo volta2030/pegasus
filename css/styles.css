@@ -67,6 +67,10 @@ select#extensionComboBox {
   position: inherit;
 }
 
+#dummyCanvas {
+  background-color: transparent;
+}
+
 #cropBtn {
   position: fixed;
   top: 122px;

@@ -1,13 +1,61 @@
-const { createBrotliCompress } = require("zlib");
-
 var bufferQueue = [];
 var infoQueue = [];
 var extensionQueue = [];
 var i = -1;
+var cropOption = false;
+
+var initialX;
+var initialY;
+var cropWidth;
+var cropHeight;
+var isDrag;
 
 var canvas = document.getElementById("previewImg");
 canvas.setAttribute("class", "img-canvas");
 var ctx = canvas.getContext("2d");
+
+canvas.addEventListener("mousedown", (event) => {
+  isDrag = true;
+  if (cropOption) {
+    var ctxs = canvas.getContext("2d");
+    initialX = event.clientX - canvas.getBoundingClientRect().left;
+    initialY = event.clientY - canvas.getBoundingClientRect().top;
+    ctxs.setLineDash([2]);
+
+    canvas.addEventListener("mousemove", (evt) => {
+      if (isDrag && cropOption) {
+        ctxs.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+        cropWidth = evt.clientX - event.clientX;
+        cropHeight = evt.clientY - event.clientY;
+        ctxs.drawImage(image, 0, 0);
+        ctxs.strokeRect(initialX, initialY, cropWidth, cropHeight);
+      }
+    });
+  }
+});
+
+canvas.addEventListener("mouseup", (evtt) => {
+  isDrag = false;
+  if (cropOption) {
+    if (cropWidth < 0 || cropHeight < 0) {
+      var ctxs = canvas.getContext("2d");
+      ctxs.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+      ctxs.drawImage(image, 0, 0);
+    }
+
+    sharp(buffer)
+      .extract({
+        left: parseInt(initialX),
+        top: parseInt(initialY),
+        width: parseInt(cropWidth),
+        height: parseInt(cropHeight),
+      })
+      .toBuffer((err, buf, info) => {
+        updatePreviewImg(buf, info, extension);
+      });
+  }
+});
+
 const image = new Image();
 openImg("./assets/addImage.png", "png");
 
@@ -56,8 +104,6 @@ function updatePreviewImg(buf, info, extension) {
     ctx.drawImage(image, 0, 0, info.width, info.height);
   };
 
-  // console.log(canvas.toDataURL());
-
   updateImgInfoText(info);
   extractMainColors(buf, info);
   updateExtension(extension);
@@ -105,7 +151,6 @@ function undoPreviewImg() {
     canvas.width = infoQueue[i].width;
     canvas.height = infoQueue[i].height;
 
-    const image = new Image();
     image.src = `data:image/${extension};base64, ` + buffer.toString("base64");
     image.onload = () => {
       ctx.drawImage(image, 0, 0);
@@ -129,7 +174,6 @@ function redoPreviewImg() {
     canvas.width = infoQueue[i].width;
     canvas.height = infoQueue[i].height;
 
-    const image = new Image();
     image.src = `data:image/${extension};base64, ` + buffer.toString("base64");
     image.onload = () => {
       ctx.drawImage(image, 0, 0);
@@ -242,3 +286,15 @@ document.getElementById("previewImg").addEventListener(
   },
   false
 );
+
+document.getElementById("cropBtn").addEventListener("click", (event) => {
+  isDrag = false;
+  initialX = initialY = cropWidth = cropHeight = 0;
+  if (!cropOption) {
+    document.getElementById("cropBtn").style.backgroundColor = "gray";
+    cropOption = true;
+  } else {
+    document.getElementById("cropBtn").style.backgroundColor = "";
+    cropOption = false;
+  }
+});
