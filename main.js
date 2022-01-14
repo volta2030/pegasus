@@ -71,7 +71,7 @@ app.whenReady().then(() => {
 
   mainWindow.loadFile("index.html");
   // Open the DevTools.(only develop)
-  // mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 
   ["resizeImgREQ", "filterImgREQ", "rotateImgREQ", "paintImgREQ"].forEach(
     (item, index, arr) => {
@@ -158,7 +158,7 @@ app.whenReady().then(() => {
   ipcMain.on("extensionValueSEND", (event, res) => {
     dialog
       .showSaveDialog({
-        title: "Save image",
+        title: "Save Image",
         defaultPath: "~/image",
         filters: [
           {
@@ -168,7 +168,7 @@ app.whenReady().then(() => {
         ],
       })
       .then((result) => {
-        event.sender.send("saveImgCMD", result.filePath);
+        event.sender.send("saveAsImgCMD", result.filePath);
       });
   });
 
@@ -179,7 +179,7 @@ app.whenReady().then(() => {
         label: "File",
         submenu: [
           {
-            label: "Open Image",
+            label: "Open",
             click: () => {
               dialog
                 .showOpenDialog({
@@ -197,7 +197,13 @@ app.whenReady().then(() => {
             },
           },
           {
-            label: "Save Image",
+            label: "Save",
+            click: () => {
+              event.sender.send("saveImgCMD");
+            },
+          },
+          {
+            label: "Save As...",
             click: () => {
               event.sender.send("setExtensionCMD");
             },

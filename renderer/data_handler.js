@@ -27,10 +27,15 @@ sioCheckBox.addEventListener("click", (event) => {
   }
 });
 
+var realPosX;
+var realPosY;
+
 canvas.addEventListener("mousedown", (event) => {
   isDrag = true;
   if (cropOption) {
     var ctxs = canvas.getContext("2d");
+    realPosX = event.clientX;
+    realPosY = event.clientY;
     initialX = event.clientX - canvas.getBoundingClientRect().left;
     initialY = event.clientY - canvas.getBoundingClientRect().top;
     ctxs.setLineDash([2]);
@@ -47,25 +52,34 @@ canvas.addEventListener("mousedown", (event) => {
   }
 });
 
-canvas.addEventListener("mouseup", (evtt) => {
+document.body.addEventListener("mouseup", (event) => {
   isDrag = false;
-  if (cropOption) {
-    if (cropWidth < 0 || cropHeight < 0) {
+  if (
+    cropOption &&
+    event.x - realPosX < canvas.clientWidth &&
+    event.y - realPosY < canvas.clientHeight
+  ) {
+    if (
+      cropWidth < 0 ||
+      cropHeight < 0 ||
+      cropWidth > canvas.clientWidth ||
+      cropHeight > canvas.clientHeight
+    ) {
       var ctxs = canvas.getContext("2d");
       ctxs.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
       ctxs.drawImage(image, 0, 0);
+    } else {
+      sharp(buffer)
+        .extract({
+          left: parseInt(initialX),
+          top: parseInt(initialY),
+          width: parseInt(cropWidth),
+          height: parseInt(cropHeight),
+        })
+        .toBuffer((err, buf, info) => {
+          updatePreviewImg(buf, info, extension);
+        });
     }
-
-    sharp(buffer)
-      .extract({
-        left: parseInt(initialX),
-        top: parseInt(initialY),
-        width: parseInt(cropWidth),
-        height: parseInt(cropHeight),
-      })
-      .toBuffer((err, buf, info) => {
-        updatePreviewImg(buf, info, extension);
-      });
   }
 });
 
@@ -86,23 +100,30 @@ ipcRenderer.on("setExtensionCMD", (event) => {
   ipcRenderer.send("extensionValueSEND", extension);
 });
 
-ipcRenderer.on(
-  "saveImgCMD",
-  (event, res) => {
-    var base64Data = image.src.replace(`data:image/${extension};base64,`, "");
-    // console.log(base64Data);
-    require("fs").writeFile(res, base64Data, "base64", (err) => {
-      if (err) {
-        console.log("failed to save");
-      } else {
-        console.log("saved successfully");
-      }
-    });
-  }
-  // }
-);
+ipcRenderer.on("saveImgCMD", (event) => {
+  saveImg(filepath, image);
+});
 
-function openImg(filepath, extension) {
+ipcRenderer.on("saveAsImgCMD", (event, res) => {
+  saveImg(res, image);
+  //update filepath
+  filepath = res;
+});
+
+function saveImg(filepath, image) {
+  var base64Data = image.src.replace(`data:image/${extension};base64,`, "");
+  // console.log(base64Data);
+  require("fs").writeFile(filepath, base64Data, "base64", (err) => {
+    if (err) {
+      console.log("failed to save");
+    } else {
+      console.log("saved successfully");
+    }
+  });
+}
+
+function openImg(filepathTmp, extension) {
+  filepath = filepathTmp;
   sharp(filepath).toBuffer((err, buf, info) => {
     updatePreviewImg(buf, info, extension);
   });
@@ -293,20 +314,22 @@ document.getElementById("previewImg").addEventListener(
   "drop",
   function (event) {
     event.preventDefault();
-    filepath = event.dataTransfer.files[0]["path"];
+    filepathTmp = event.dataTransfer.files[0]["path"];
     extension = path.extname(filepath).replace(".", "");
-    openImg(filepath, extension);
+    openImg(filepathTmp, extension);
   },
   false
 );
 
 document.getElementById("cropBtn").addEventListener("click", (event) => {
   isDrag = false;
-  initialX = initialY = cropWidth = cropHeight = 0;
+  // initialX = initialY = cropWidth = cropHeight = 0;
   if (!cropOption) {
+    canvas.setAttribute("draggable", false);
     document.getElementById("cropBtn").style.backgroundColor = "gray";
     cropOption = true;
   } else {
+    canvas.setAttribute("draggable", true);
     document.getElementById("cropBtn").style.backgroundColor = "";
     cropOption = false;
   }
