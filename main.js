@@ -71,7 +71,7 @@ app.whenReady().then(() => {
 
   mainWindow.loadFile("index.html");
   // Open the DevTools.(only develop)
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 
   ["resizeImgREQ", "filterImgREQ", "rotateImgREQ"].forEach(
     (item, index, arr) => {
