@@ -1,3 +1,5 @@
+const { fileURLToPath } = require("url");
+
 var bufferQueue = [];
 var infoQueue = [];
 var extensionQueue = [];
@@ -10,9 +12,10 @@ var cropWidth;
 var cropHeight;
 var isDrag;
 
-var canvas = document.getElementById("previewImg");
+const canvas = document.getElementById("previewImg");
 canvas.setAttribute("class", "img-canvas");
 var sioCheckBox = document.getElementById("showImageOnlyCheckBox");
+const cropBtn = document.getElementById("cropBtn");
 var ctx = canvas.getContext("2d");
 
 sioCheckBox.addEventListener("click", (event) => {
@@ -106,18 +109,23 @@ ipcRenderer.on("saveImgCMD", (event) => {
 
 ipcRenderer.on("saveAsImgCMD", (event, res) => {
   saveImg(res, image);
-  //update filepath
   filepath = res;
 });
 
 function saveImg(filepath, image) {
   var base64Data = image.src.replace(`data:image/${extension};base64,`, "");
-  // console.log(base64Data);
+
   require("fs").writeFile(filepath, base64Data, "base64", (err) => {
     if (err) {
-      console.log("failed to save");
+      // console.log("failed to save");
     } else {
-      console.log("saved successfully");
+      // console.log("saved successfully");
+      document
+        .getElementById("save_msg")
+        .animate([{ opacity: "1" }, { opacity: "0" }], {
+          duration: 1800,
+          iterations: 1,
+        });
     }
   });
 }
@@ -164,6 +172,8 @@ function updatePreviewImg(buf, info, extension) {
 
 function updateExtension(extension) {
   document.getElementById("extensionComboBox").value = extension;
+  if (!filepath.includes(extension)) {
+  }
 }
 
 function updateImgInfoText(info) {
@@ -321,16 +331,16 @@ document.getElementById("previewImg").addEventListener(
   false
 );
 
-document.getElementById("cropBtn").addEventListener("click", (event) => {
+cropBtn.addEventListener("click", (event) => {
   isDrag = false;
   // initialX = initialY = cropWidth = cropHeight = 0;
   if (!cropOption) {
     canvas.setAttribute("draggable", false);
-    document.getElementById("cropBtn").style.backgroundColor = "gray";
+    cropBtn.style.backgroundColor = "gray";
     cropOption = true;
   } else {
     canvas.setAttribute("draggable", true);
-    document.getElementById("cropBtn").style.backgroundColor = "";
+    cropBtn.style.backgroundColor = "";
     cropOption = false;
   }
 });

@@ -16,11 +16,19 @@ body {
   height: 24px;
 }
 
-#toolBox {
+#toolBox1 {
   position: fixed;
   top: 0px;
   left: 0px;
   display: flex;
+}
+
+#toolBox2 {
+  position: fixed;
+  top: 122px;
+  right: 0px;
+  display: flex;
+  width: 80px;
 }
 
 #imgPanel {

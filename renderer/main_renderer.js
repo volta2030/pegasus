@@ -6,15 +6,13 @@ var filepath = null;
 var buffer = null;
 var extension = null;
 
-["resizeBtn", "filterBtn", "rotateBtn", "paintBtn"].forEach(
-  (item, index, arr) => {
-    document.getElementById(item).addEventListener("click", (event) => {
-      if (filepath !== null) {
-        ipcRenderer.send(`${item.replace("Btn", "")}ImgREQ`);
-      }
-    });
-  }
-);
+["resizeBtn", "filterBtn", "rotateBtn"].forEach((item, index, arr) => {
+  document.getElementById(item).addEventListener("click", (event) => {
+    if (filepath !== null) {
+      ipcRenderer.send(`${item.replace("Btn", "")}ImgREQ`);
+    }
+  });
+});
 
 ipcRenderer.send("showMenuREQ", "ping");
 
@@ -93,6 +91,14 @@ ipcRenderer.on("flipImgCMD", (event) => {
 ipcRenderer.on("flopImgCMD", (event) => {
   sharp(buffer)
     .flop()
+    .toBuffer((err, buf, info) => {
+      updatePreviewImg(buf, info, extension);
+    });
+});
+
+ipcRenderer.on("negativeImgCMD", (event) => {
+  sharp(buffer)
+    .negate(true)
     .toBuffer((err, buf, info) => {
       updatePreviewImg(buf, info, extension);
     });
@@ -187,6 +193,8 @@ document.addEventListener("keydown", function (event) {
     undoPreviewImg();
   } else if (event.ctrlKey && event.key === "y") {
     redoPreviewImg();
+  } else if (event.ctrlKey && event.key === "s") {
+    ipcRenderer.send("saveImgREQ");
   } else if (event.which === 122) {
     ipcRenderer.send("FullScreenREQ");
   } else if (event.key === "Escape") {

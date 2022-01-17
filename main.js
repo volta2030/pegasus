@@ -73,7 +73,7 @@ app.whenReady().then(() => {
   // Open the DevTools.(only develop)
   mainWindow.webContents.openDevTools();
 
-  ["resizeImgREQ", "filterImgREQ", "rotateImgREQ", "paintImgREQ"].forEach(
+  ["resizeImgREQ", "filterImgREQ", "rotateImgREQ"].forEach(
     (item, index, arr) => {
       ipcMain.on(item, (event) => {
         mainWindow
@@ -140,6 +140,11 @@ app.whenReady().then(() => {
     mainWindow.webContents.focus();
   });
 
+  ipcMain.on("negativeImgREQ", (event) => {
+    mainWindow.webContents.send("negativeImgCMD");
+    mainWindow.webContents.focus();
+  });
+
   ipcMain.on("grayScaleImgREQ", (event) => {
     mainWindow.webContents.send("grayScaleImgCMD");
     mainWindow.webContents.focus();
@@ -170,6 +175,10 @@ app.whenReady().then(() => {
       .then((result) => {
         event.sender.send("saveAsImgCMD", result.filePath);
       });
+  });
+
+  ipcMain.on("saveImgREQ", (event) => {
+    event.sender.send("saveImgCMD");
   });
 
   // main

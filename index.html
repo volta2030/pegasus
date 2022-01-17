@@ -16,7 +16,7 @@
   </head>
 
   <body>
-    <div id="toolBox">
+    <div id="toolBox1">
       <button title="resize" id="resizeBtn">
         <img class="icon" src="assets/resize.ico" />
       <button title="filter" id="filterBtn">
@@ -25,14 +25,16 @@
       <button title="rotate" id="rotateBtn">
           <img class="icon" src="assets/rotate.ico" />
       </button>
-      <button title="paint" id="paintBtn">
-        <img class="icon" src="assets/paint.ico" />
-    </button>
     </div>
     
-    <button title="crop" id="cropBtn">
-      <img class="icon" src="assets/crop.ico" />
-    </button>
+    <div id="toolBox2">
+      <button title="crop" id="cropBtn">
+        <img class="icon" src="assets/crop.ico" />
+      </button>
+      <!-- <button title="paint" id="paintBtn">
+        <img class="icon" src="assets/paint.ico" />
+      </button> -->
+    </div>
 
     <div id="imgPanel">
       <canvas id="previewImg" draggable="true" ></canvas>
@@ -54,6 +56,7 @@
 
     <label id="showImageOnlyLabel" ><input id="showImageOnlyCheckBox" type="checkbox"/>Show Image Only</label>
     <div id="convert_msg" class="alert-box">Convert Successfully</div>
+    <div id="save_msg" class="alert-box">Save Successfully</div>
     <div id="copy_msg" class="alert-box">Color Copied</div>
 
     <script src="./renderer/main_renderer.js"></script>
