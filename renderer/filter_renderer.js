@@ -30,6 +30,10 @@ document.getElementById("medianBtn").addEventListener("click", () => {
   ipcRenderer.send("medianValueSEND", Number(medianValue));
 });
 
+document.getElementById("bitwiseBtn").addEventListener("click", () => {
+  ipcRenderer.send("bitwiseImgREQ");
+});
+
 document.getElementById("negativeBtn").addEventListener("click", () => {
   ipcRenderer.send("negativeImgREQ");
 });

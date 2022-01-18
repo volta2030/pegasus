@@ -2,6 +2,8 @@ const { ipcRenderer } = require("electron");
 const sharp = require("sharp");
 var path = require("path");
 
+// const ImageLayer = require("imgkit");
+
 var filepath = null;
 var buffer = null;
 var extension = null;
@@ -96,6 +98,14 @@ ipcRenderer.on("flopImgCMD", (event) => {
     });
 });
 
+ipcRenderer.on("bitwiseImgCMD", (event) => {
+  sharp(buffer)
+    .threshold()
+    .toBuffer((err, buf, info) => {
+      updatePreviewImg(buf, info, extension);
+    });
+});
+
 ipcRenderer.on("negativeImgCMD", (event) => {
   sharp(buffer)
     .negate(true)
@@ -185,8 +195,6 @@ document.getElementById("mainColor3").addEventListener("click", (event) => {
       iterations: 1,
     });
 });
-
-// document.getElementById("cropBtn").addEventListener("click", (event) => {});
 
 document.addEventListener("keydown", function (event) {
   if (event.ctrlKey && event.key === "z") {

@@ -1,0 +1,11 @@
+{
+  "name": "imgkit",
+  "version": "1.0.0",
+  "description": "pegasus engine",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo"
+  },
+  "author": "volta2030",
+  "license": "MIT"
+}

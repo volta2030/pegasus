@@ -71,7 +71,7 @@ app.whenReady().then(() => {
 
   mainWindow.loadFile("index.html");
   // Open the DevTools.(only develop)
-  // mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 
   ["resizeImgREQ", "filterImgREQ", "rotateImgREQ"].forEach(
     (item, index, arr) => {
@@ -137,6 +137,11 @@ app.whenReady().then(() => {
 
   ipcMain.on("flopImgREQ", (event) => {
     mainWindow.webContents.send("flopImgCMD");
+    mainWindow.webContents.focus();
+  });
+
+  ipcMain.on("bitwiseImgREQ", (event) => {
+    mainWindow.webContents.send("bitwiseImgCMD");
     mainWindow.webContents.focus();
   });
 

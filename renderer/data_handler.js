@@ -1,16 +1,13 @@
-const { fileURLToPath } = require("url");
+const { ImageLayer } = require("imgkit");
 
 var bufferQueue = [];
 var infoQueue = [];
 var extensionQueue = [];
 var i = -1;
 var cropOption = false;
-
-var initialX;
-var initialY;
-var cropWidth;
-var cropHeight;
 var isDrag;
+
+const imageLayer = new ImageLayer();
 
 const canvas = document.getElementById("previewImg");
 canvas.setAttribute("class", "img-canvas");
@@ -37,19 +34,24 @@ canvas.addEventListener("mousedown", (event) => {
   isDrag = true;
   if (cropOption) {
     var ctxs = canvas.getContext("2d");
-    realPosX = event.clientX;
-    realPosY = event.clientY;
-    initialX = event.clientX - canvas.getBoundingClientRect().left;
-    initialY = event.clientY - canvas.getBoundingClientRect().top;
+    imageLayer.realPosX = event.clientX;
+    imageLayer.realPosY = event.clientY;
+    imageLayer.initialX = event.clientX - canvas.getBoundingClientRect().left;
+    imageLayer.initialY = event.clientY - canvas.getBoundingClientRect().top;
     ctxs.setLineDash([2]);
 
     canvas.addEventListener("mousemove", (evt) => {
       if (isDrag && cropOption) {
         ctxs.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
-        cropWidth = evt.clientX - event.clientX;
-        cropHeight = evt.clientY - event.clientY;
+        imageLayer.cropWidth = evt.clientX - event.clientX;
+        imageLayer.cropHeight = evt.clientY - event.clientY;
         ctxs.drawImage(image, 0, 0);
-        ctxs.strokeRect(initialX, initialY, cropWidth, cropHeight);
+        ctxs.strokeRect(
+          imageLayer.initialX,
+          imageLayer.initialY,
+          imageLayer.cropWidth,
+          imageLayer.cropHeight
+        );
       }
     });
   }
@@ -59,14 +61,14 @@ document.body.addEventListener("mouseup", (event) => {
   isDrag = false;
   if (
     cropOption &&
-    event.x - realPosX < canvas.clientWidth &&
-    event.y - realPosY < canvas.clientHeight
+    event.x - imageLayer.realPosX < canvas.clientWidth &&
+    event.y - imageLayer.realPosY < canvas.clientHeight
   ) {
     if (
-      cropWidth < 0 ||
-      cropHeight < 0 ||
-      cropWidth > canvas.clientWidth ||
-      cropHeight > canvas.clientHeight
+      imageLayer.cropWidth < 0 ||
+      imageLayer.cropHeight < 0 ||
+      imageLayer.cropWidth > canvas.clientWidth ||
+      imageLayer.cropHeight > canvas.clientHeight
     ) {
       var ctxs = canvas.getContext("2d");
       ctxs.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
@@ -74,10 +76,10 @@ document.body.addEventListener("mouseup", (event) => {
     } else {
       sharp(buffer)
         .extract({
-          left: parseInt(initialX),
-          top: parseInt(initialY),
-          width: parseInt(cropWidth),
-          height: parseInt(cropHeight),
+          left: parseInt(imageLayer.initialX),
+          top: parseInt(imageLayer.initialY),
+          width: parseInt(imageLayer.cropWidth),
+          height: parseInt(imageLayer.cropHeight),
         })
         .toBuffer((err, buf, info) => {
           updatePreviewImg(buf, info, extension);
@@ -336,10 +338,12 @@ cropBtn.addEventListener("click", (event) => {
   // initialX = initialY = cropWidth = cropHeight = 0;
   if (!cropOption) {
     canvas.setAttribute("draggable", false);
+    document.body.style.cursor = "crosshair";
     cropBtn.style.backgroundColor = "gray";
     cropOption = true;
   } else {
     canvas.setAttribute("draggable", true);
+    document.body.style.cursor = "default";
     cropBtn.style.backgroundColor = "";
     cropOption = false;
   }
