@@ -133,6 +133,7 @@ var infoQueue = [];
 var extensionQueue = [];
 var i = -1;
 var cropOption = false;
+var paintOption = false;
 var isDrag;
 
 const imageLayer = new ImageLayer();
@@ -146,16 +147,17 @@ const imgPanel = document.body.appendChild(imageLayer.imgPanel);
 // const canvas = document.getElementById("previewImg");
 var sioCheckBox = document.getElementById("showImageOnlyCheckBox");
 const cropBtn = document.getElementById("cropBtn");
+const paintBtn = document.getElementById("paintBtn");
 // var ctx = canvas.getContext("2d");
 
 sioCheckBox.addEventListener("click", (event) => {
   if (sioCheckBox.checked) {
-    document.getElementById("mainColorBox").style.visibility = "hidden";
-    document.getElementById("imgInfoText").style.visibility = "hidden";
+    imageLayer.mainColorBox.style.visibility = "hidden";
+    imageLayer.imgInfoText.style.visibility = "hidden";
     imageLayer.extensionComboBox.style.visibility = "hidden";
   } else {
-    document.getElementById("mainColorBox").style.visibility = "visible";
-    document.getElementById("imgInfoText").style.visibility = "visible";
+    imageLayer.mainColorBox.style.visibility = "visible";
+    imageLayer.imgInfoText.style.visibility = "visible";
     imageLayer.extensionComboBox.style.visibility = "visible";
   }
 });
@@ -307,9 +309,9 @@ canvas.addEventListener(
   "drop",
   function (event) {
     event.preventDefault();
-    filepathTmp = event.dataTransfer.files[0]["path"];
+    filepath = event.dataTransfer.files[0]["path"];
     extension = path.extname(filepath).replace(".", "");
-    imageLayer.openImg(filepathTmp, extension);
+    imageLayer.openImg(filepath, extension);
   },
   false
 );
@@ -329,6 +331,8 @@ cropBtn.addEventListener("click", (event) => {
     cropOption = false;
   }
 });
+
+function inactivate() {}
 
 imageLayer.extensionComboBox.addEventListener("change", (event) => {
   extension = event.target.value;

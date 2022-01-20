@@ -4,13 +4,15 @@ class ImageLayer {
   constructor() {
     //initialize
     this.imgPanel = document.createElement("div");
-    this.imgPanel.id = "div";
+    this.imgPanel.id = "imgPanel";
 
     this.canvas = document.createElement("canvas");
     this.canvas.setAttribute("class", "img-canvas");
     this.canvas.id = "previewImg";
 
     this.mainColorBox = document.createElement("div");
+    this.mainColorBox.id = "mainColorBox";
+
     this.mainColor1 = document.createElement("div");
     this.mainColor1.id = "mainColor1";
     this.mainColor1.className = "colorBox";
@@ -54,10 +56,10 @@ class ImageLayer {
 
     this.ctx = this.canvas.getContext("2d");
 
-    this.bufferQueue = [];
-    this.infoQueue = [];
-    this.extensionQueue = [];
-    this.i = -1;
+    // this.bufferQueue = [];
+    // this.infoQueue = [];
+    // this.extensionQueue = [];
+    // this.i = -1;
 
     this.initialX;
     this.initialY;
@@ -70,10 +72,10 @@ class ImageLayer {
     this.image = new Image();
     this.filepath;
 
-    this.attach();
+    this.build();
   }
 
-  attach() {
+  build() {
     this.imgPanel.appendChild(this.canvas);
     this.imgPanel.appendChild(this.mainColorBox);
     this.imgPanel.appendChild(this.imgInfoText);
