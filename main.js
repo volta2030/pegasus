@@ -73,7 +73,7 @@ app.whenReady().then(() => {
   // Open the DevTools.(only develop)
   // mainWindow.webContents.openDevTools();
 
-  ["resizeImgREQ", "filterImgREQ", "rotateImgREQ"].forEach(
+  ["resizeImgREQ", "filterImgREQ", "rotateImgREQ", "paintImgREQ"].forEach(
     (item, index, arr) => {
       ipcMain.on(item, (event) => {
         mainWindow
@@ -152,6 +152,16 @@ app.whenReady().then(() => {
 
   ipcMain.on("grayScaleImgREQ", (event) => {
     mainWindow.webContents.send("grayScaleImgCMD");
+    mainWindow.webContents.focus();
+  });
+
+  ipcMain.on("cropImgREQ", (event, res) => {
+    mainWindow.webContents.send("cropImgCMD", res);
+    mainWindow.webContents.focus();
+  });
+
+  ipcMain.on("drawImgREQ", (event, res) => {
+    mainWindow.webContents.send("drawImgCMD", res);
     mainWindow.webContents.focus();
   });
 

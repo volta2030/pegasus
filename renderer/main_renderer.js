@@ -1,18 +1,27 @@
 const { ipcRenderer } = require("electron");
-const { ImageLayer, openImg } = require("imgkit");
+const { ImageLayer } = require("imgkit");
+
 const sharp = require("sharp");
 var path = require("path");
+var isDrag = false;
 var filepath = null;
 var buffer = null;
+var infos = null;
 var extension = null;
+var cropFlag = false;
+var drawFlag = false;
 
-["resizeBtn", "filterBtn", "rotateBtn"].forEach((item, index, arr) => {
-  document.getElementById(item).addEventListener("click", (event) => {
-    if (filepath !== null) {
-      ipcRenderer.send(`${item.replace("Btn", "")}ImgREQ`);
-    }
-  });
-});
+["resizeBtn", "filterBtn", "rotateBtn", "paintBtn"].forEach(
+  (item, index, arr) => {
+    document.getElementById(item).addEventListener("click", (event) => {
+      if (filepath !== null) {
+        ipcRenderer.send(`${item.replace("Btn", "")}ImgREQ`);
+        ImageLayer.cropFlag = false;
+        ImageLayer.drawFlag = false;
+      }
+    });
+  }
+);
 
 ipcRenderer.send("showMenuREQ", "ping");
 
@@ -128,14 +137,36 @@ ipcRenderer.on("tintImgCMD", (event, res) => {
     });
 });
 
+ipcRenderer.on("cropImgCMD", (event, res) => {
+  cropFlag = res;
+  isDrag = false;
+  // initialX = initialY = cropWidth = cropHeight = 0;
+  if (cropFlag) {
+    canvas.setAttribute("draggable", false);
+    document.body.style.cursor = "crosshair";
+    // cropBtn.style.backgroundColor = "gray";
+  } else {
+    canvas.setAttribute("draggable", true);
+    document.body.style.cursor = "default";
+    // cropBtn.style.backgroundColor = "";
+  }
+});
+
+ipcRenderer.on("drawImgCMD", (event, res) => {
+  drawFlag = res;
+  isDrag = false;
+  if (drawFlag) {
+    canvas.setAttribute("draggable", false);
+  } else {
+    canvas.setAttribute("draggable", true);
+    document.body.style.cursor = "default";
+  }
+});
+
 var bufferQueue = [];
 var infoQueue = [];
 var extensionQueue = [];
 var i = -1;
-var cropOption = false;
-var paintOption = false;
-var isDrag;
-
 const imageLayer = new ImageLayer();
 const canvas = imageLayer.canvas;
 
@@ -146,9 +177,9 @@ const imgPanel = document.body.appendChild(imageLayer.imgPanel);
 
 // const canvas = document.getElementById("previewImg");
 var sioCheckBox = document.getElementById("showImageOnlyCheckBox");
-const cropBtn = document.getElementById("cropBtn");
-const paintBtn = document.getElementById("paintBtn");
-// var ctx = canvas.getContext("2d");
+// const cropBtn = document.getElementById("cropBtn");
+// const paintBtn = document.getElementById("paintBtn");
+var ctx = imageLayer.canvas.getContext("2d");
 
 sioCheckBox.addEventListener("click", (event) => {
   if (sioCheckBox.checked) {
@@ -164,7 +195,26 @@ sioCheckBox.addEventListener("click", (event) => {
 
 canvas.addEventListener("mousedown", (event) => {
   isDrag = true;
-  if (cropOption) {
+  if (drawFlag) {
+    console.log(drawFlag);
+    ctx.beginPath();
+    ctx.moveTo(
+      event.clientX - canvas.getBoundingClientRect().left,
+      event.clientY - canvas.getBoundingClientRect().top
+    );
+    canvas.addEventListener("mousemove", (evt) => {
+      if (isDrag && drawFlag) {
+        ctx.lineTo(
+          evt.x - canvas.getBoundingClientRect().left,
+          evt.y - canvas.getBoundingClientRect().top
+        );
+        ctx.stroke();
+      }
+    });
+    ctx.closePath();
+  }
+
+  if (cropFlag) {
     var ctxs = canvas.getContext("2d");
     imageLayer.realPosX = event.clientX;
     imageLayer.realPosY = event.clientY;
@@ -173,7 +223,7 @@ canvas.addEventListener("mousedown", (event) => {
     ctxs.setLineDash([2]);
 
     canvas.addEventListener("mousemove", (evt) => {
-      if (isDrag && cropOption) {
+      if (isDrag && cropFlag) {
         ctxs.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
         imageLayer.cropWidth = evt.clientX - event.clientX;
         imageLayer.cropHeight = evt.clientY - event.clientY;
@@ -192,7 +242,7 @@ canvas.addEventListener("mousedown", (event) => {
 document.body.addEventListener("mouseup", (event) => {
   isDrag = false;
   if (
-    cropOption &&
+    cropFlag &&
     event.x - imageLayer.realPosX < canvas.clientWidth &&
     event.y - imageLayer.realPosY < canvas.clientHeight
   ) {
@@ -215,6 +265,7 @@ document.body.addEventListener("mouseup", (event) => {
         })
         .toBuffer((err, buf, info) => {
           imageLayer.updatePreviewImg(buf, info, extension);
+          infos = info;
         });
     }
   }
@@ -229,7 +280,7 @@ ipcRenderer.on("openImgCMD", (event, res) => {
     imageLayer.openImg("./assets/addImage.png", "png");
   } else {
     extension = path.extname(filepath).replace(".", "");
-    imageLayer.openImg(filepath, extension);
+    imageLayopenImg(filepath, extension);
   }
 });
 
@@ -253,7 +304,7 @@ function undoPreviewImg() {
   console.log(i);
   try {
     buffer = bufferQueue[i];
-    info = infoQueue[i];
+    infos = infoQueue[i];
     extension = extensionQueue[i];
 
     canvas.width = infoQueue[i].width;
@@ -264,8 +315,8 @@ function undoPreviewImg() {
       imageLayer.ctx.drawImage(image, 0, 0);
     };
 
-    imageLayer.updateImgInfoText(info);
-    imageLayer.extractMainColors(buffer, info);
+    imageLayer.updateImgInfoText(infos);
+    imageLayer.extractMainColors(buffer, infos);
     imageLayer.updateExtension(extension);
   } catch (err) {
     i++;
@@ -276,7 +327,7 @@ function redoPreviewImg() {
   i++;
   try {
     buffer = bufferQueue[i];
-    info = infoQueue[i];
+    infos = infoQueue[i];
     extension = extensionQueue[i];
 
     canvas.width = infoQueue[i].width;
@@ -287,8 +338,8 @@ function redoPreviewImg() {
       imageLayer.ctx.drawImage(image, 0, 0);
     };
 
-    imageLayer.updateImgInfoText(info);
-    imageLayer.extractMainColors(buffer, info);
+    imageLayer.updateImgInfoText(infos);
+    imageLayer.extractMainColors(buffer, infos);
     imageLayer.updateExtension(extension);
   } catch (err) {
     i--;
@@ -315,22 +366,6 @@ canvas.addEventListener(
   },
   false
 );
-
-cropBtn.addEventListener("click", (event) => {
-  isDrag = false;
-  // initialX = initialY = cropWidth = cropHeight = 0;
-  if (!cropOption) {
-    canvas.setAttribute("draggable", false);
-    document.body.style.cursor = "crosshair";
-    cropBtn.style.backgroundColor = "gray";
-    cropOption = true;
-  } else {
-    canvas.setAttribute("draggable", true);
-    document.body.style.cursor = "default";
-    cropBtn.style.backgroundColor = "";
-    cropOption = false;
-  }
-});
 
 function inactivate() {}
 

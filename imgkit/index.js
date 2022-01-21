@@ -1,6 +1,8 @@
 const sharp = require("sharp");
 
 class ImageLayer {
+  static drawFlag = false;
+  static cropFlag = false;
   constructor() {
     //initialize
     this.imgPanel = document.createElement("div");
@@ -93,6 +95,8 @@ class ImageLayer {
   }
 
   updatePreviewImg(buf, info, extension) {
+    console.log(info);
+
     canvas.width = info.width;
     canvas.height = info.height;
 
@@ -240,4 +244,6 @@ class ImageLayer {
 
 module.exports = {
   ImageLayer: ImageLayer,
+  drawFlag: ImageLayer.drawFlag,
+  cropFlag: ImageLayer.cropFlag,
 };
