@@ -3,18 +3,12 @@ const { ImageLayer } = require("imgkit");
 
 const sharp = require("sharp");
 var path = require("path");
-var isDrag = false;
-var filepath = null;
-var buffer = null;
-var infos = null;
-var extension = null;
-var cropFlag = false;
-var drawFlag = false;
+var fullScreenFlag = false;
 
 ["resizeBtn", "filterBtn", "rotateBtn", "paintBtn"].forEach(
   (item, index, arr) => {
     document.getElementById(item).addEventListener("click", (event) => {
-      if (filepath !== null) {
+      if (imageLayer.filepath !== null) {
         ipcRenderer.send(`${item.replace("Btn", "")}ImgREQ`);
         ImageLayer.cropFlag = false;
         ImageLayer.drawFlag = false;
@@ -26,122 +20,122 @@ var drawFlag = false;
 ipcRenderer.send("showMenuREQ", "ping");
 
 ipcRenderer.on("resizeImgCMD", (event, res) => {
-  sharp(buffer)
+  sharp(imageLayer.buffer)
     .resize({ width: document.getElementById("previewImg").width * res })
     .toBuffer((err, buf, info) => {
-      imageLayer.updatePreviewImg(buf, info, extension);
+      imageLayer.updatePreviewImg(buf, info);
     });
 });
 
 ipcRenderer.on("blurImgCMD", (event, res) => {
-  sharp(buffer)
+  sharp(imageLayer.buffer)
     .blur(res)
     .toBuffer((err, buf, info) => {
-      imageLayer.updatePreviewImg(buf, info, extension);
+      imageLayer.updatePreviewImg(buf, info);
     });
 });
 
 ipcRenderer.on("sharpenImgCMD", (event, res) => {
-  sharp(buffer)
+  sharp(imageLayer.buffer)
     .sharpen(res, 1.0, 2.0)
     .toBuffer((err, buf, info) => {
-      imageLayer.updatePreviewImg(buf, info, extension);
+      imageLayer.updatePreviewImg(buf, info);
     });
 });
 
 ipcRenderer.on("normalizeImgCMD", (event) => {
-  sharp(buffer)
+  sharp(imageLayer.buffer)
     .normalize(true)
     .toBuffer((err, buf, info) => {
-      imageLayer.updatePreviewImg(buf, info, extension);
+      imageLayer.updatePreviewImg(buf, info);
     });
 });
 
 ipcRenderer.on("medianImgCMD", (event, res) => {
-  sharp(buffer)
+  sharp(imageLayer.buffer)
     .median(res)
     .toBuffer((err, buf, info) => {
-      imageLayer.updatePreviewImg(buf, info, extension);
+      imageLayer.updatePreviewImg(buf, info);
     });
 });
 
 ipcRenderer.on("rotateImgCMD", (event, res) => {
-  sharp(buffer)
+  sharp(imageLayer.buffer)
     .rotate(res)
     .toBuffer((err, buf, info) => {
-      imageLayer.updatePreviewImg(buf, info, extension);
+      imageLayer.updatePreviewImg(buf, info);
     });
 });
 
 ipcRenderer.on("rotateRightImgCMD", (event) => {
-  sharp(buffer)
+  sharp(imageLayer.buffer)
     .rotate(90)
     .toBuffer((err, buf, info) => {
-      imageLayer.updatePreviewImg(buf, info, extension);
+      imageLayer.updatePreviewImg(buf, info);
     });
 });
 
 ipcRenderer.on("rotateLeftImgCMD", (event) => {
-  sharp(buffer)
+  sharp(imageLayer.buffer)
     .rotate(-90)
     .toBuffer((err, buf, info) => {
-      imageLayer.updatePreviewImg(buf, info, extension);
+      imageLayer.updatePreviewImg(buf, info);
     });
 });
 
 ipcRenderer.on("flipImgCMD", (event) => {
-  sharp(buffer)
+  sharp(imageLayer.buffer)
     .flip()
     .toBuffer((err, buf, info) => {
-      imageLayer.updatePreviewImg(buf, info, extension);
+      imageLayer.updatePreviewImg(buf, info);
     });
 });
 
 ipcRenderer.on("flopImgCMD", (event) => {
-  sharp(buffer)
+  sharp(imageLayer.buffer)
     .flop()
     .toBuffer((err, buf, info) => {
-      imageLayer.updatePreviewImg(buf, info, extension);
+      imageLayer.updatePreviewImg(buf, info);
     });
 });
 
 ipcRenderer.on("bitwiseImgCMD", (event) => {
-  sharp(buffer)
+  sharp(imageLayer.buffer)
     .threshold()
     .toBuffer((err, buf, info) => {
-      imageLayer.updatePreviewImg(buf, info, extension);
+      imageLayer.updatePreviewImg(buf, info);
     });
 });
 
 ipcRenderer.on("negativeImgCMD", (event) => {
-  sharp(buffer)
+  sharp(imageLayer.buffer)
     .negate(true)
     .toBuffer((err, buf, info) => {
-      imageLayer.updatePreviewImg(buf, info, extension);
+      imageLayer.updatePreviewImg(buf, info);
     });
 });
 
 ipcRenderer.on("grayScaleImgCMD", (event) => {
-  sharp(buffer)
+  sharp(imageLayer.buffer)
     .grayscale(true)
     .toBuffer((err, buf, info) => {
-      imageLayer.updatePreviewImg(buf, info, extension);
+      imageLayer.updatePreviewImg(buf, info);
     });
 });
 
 ipcRenderer.on("tintImgCMD", (event, res) => {
-  sharp(buffer)
+  sharp(imageLayer.buffer)
     .tint(res)
     .toBuffer((err, buf, info) => {
-      imageLayer.updatePreviewImg(buf, info, extension);
+      imageLayer.updatePreviewImg(buf, info);
     });
 });
 
 ipcRenderer.on("cropImgCMD", (event, res) => {
-  cropFlag = res;
-  isDrag = false;
+  ImageLayer.cropFlag = res;
+  ImageLayer.dragFlag = false;
   // initialX = initialY = cropWidth = cropHeight = 0;
-  if (cropFlag) {
+  if (ImageLayer.cropFlag) {
     canvas.setAttribute("draggable", false);
     document.body.style.cursor = "crosshair";
     // cropBtn.style.backgroundColor = "gray";
@@ -153,9 +147,9 @@ ipcRenderer.on("cropImgCMD", (event, res) => {
 });
 
 ipcRenderer.on("drawImgCMD", (event, res) => {
-  drawFlag = res;
-  isDrag = false;
-  if (drawFlag) {
+  ImageLayer.drawFlag = res;
+  ImageLayer.dragFlag = false;
+  if (ImageLayer.drawFlag) {
     canvas.setAttribute("draggable", false);
   } else {
     canvas.setAttribute("draggable", true);
@@ -163,23 +157,12 @@ ipcRenderer.on("drawImgCMD", (event, res) => {
   }
 });
 
-var bufferQueue = [];
-var infoQueue = [];
-var extensionQueue = [];
-var i = -1;
 const imageLayer = new ImageLayer();
 const canvas = imageLayer.canvas;
 
 const imgPanel = document.body.appendChild(imageLayer.imgPanel);
-// imgPanel.appendChild(imageLayer.mainColorBox);
-// imageLayer.imgPanel.appendChild(imageLayer.extensionComboBox);
-//document.getElementById("imgPanel").appendChild(canvas);
 
-// const canvas = document.getElementById("previewImg");
 var sioCheckBox = document.getElementById("showImageOnlyCheckBox");
-// const cropBtn = document.getElementById("cropBtn");
-// const paintBtn = document.getElementById("paintBtn");
-var ctx = imageLayer.canvas.getContext("2d");
 
 sioCheckBox.addEventListener("click", (event) => {
   if (sioCheckBox.checked) {
@@ -193,56 +176,10 @@ sioCheckBox.addEventListener("click", (event) => {
   }
 });
 
-canvas.addEventListener("mousedown", (event) => {
-  isDrag = true;
-  if (drawFlag) {
-    console.log(drawFlag);
-    ctx.beginPath();
-    ctx.moveTo(
-      event.clientX - canvas.getBoundingClientRect().left,
-      event.clientY - canvas.getBoundingClientRect().top
-    );
-    canvas.addEventListener("mousemove", (evt) => {
-      if (isDrag && drawFlag) {
-        ctx.lineTo(
-          evt.x - canvas.getBoundingClientRect().left,
-          evt.y - canvas.getBoundingClientRect().top
-        );
-        ctx.stroke();
-      }
-    });
-    ctx.closePath();
-  }
-
-  if (cropFlag) {
-    var ctxs = canvas.getContext("2d");
-    imageLayer.realPosX = event.clientX;
-    imageLayer.realPosY = event.clientY;
-    imageLayer.initialX = event.clientX - canvas.getBoundingClientRect().left;
-    imageLayer.initialY = event.clientY - canvas.getBoundingClientRect().top;
-    ctxs.setLineDash([2]);
-
-    canvas.addEventListener("mousemove", (evt) => {
-      if (isDrag && cropFlag) {
-        ctxs.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
-        imageLayer.cropWidth = evt.clientX - event.clientX;
-        imageLayer.cropHeight = evt.clientY - event.clientY;
-        ctxs.drawImage(image, 0, 0);
-        ctxs.strokeRect(
-          imageLayer.initialX,
-          imageLayer.initialY,
-          imageLayer.cropWidth,
-          imageLayer.cropHeight
-        );
-      }
-    });
-  }
-});
-
 document.body.addEventListener("mouseup", (event) => {
-  isDrag = false;
+  ImageLayer.dragFlag = false;
   if (
-    cropFlag &&
+    ImageLayer.cropFlag &&
     event.x - imageLayer.realPosX < canvas.clientWidth &&
     event.y - imageLayer.realPosY < canvas.clientHeight
   ) {
@@ -252,11 +189,10 @@ document.body.addEventListener("mouseup", (event) => {
       imageLayer.cropWidth > canvas.clientWidth ||
       imageLayer.cropHeight > canvas.clientHeight
     ) {
-      var ctxs = canvas.getContext("2d");
-      ctxs.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
-      ctxs.drawImage(image, 0, 0);
+      this.ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+      this.ctx.drawImage(imageLayer.image, 0, 0);
     } else {
-      sharp(buffer)
+      sharp(imageLayer.buffer)
         .extract({
           left: parseInt(imageLayer.initialX),
           top: parseInt(imageLayer.initialY),
@@ -264,125 +200,36 @@ document.body.addEventListener("mouseup", (event) => {
           height: parseInt(imageLayer.cropHeight),
         })
         .toBuffer((err, buf, info) => {
-          imageLayer.updatePreviewImg(buf, info, extension);
-          infos = info;
+          imageLayer.updatePreviewImg(buf, info);
         });
     }
   }
 });
 
-const image = imageLayer.image;
-imageLayer.openImg("./assets/addImage.png", "png");
-
+imageLayer.openImg("./assets/addImage.png");
+console.log(imageLayer.filepath);
 ipcRenderer.on("openImgCMD", (event, res) => {
-  filepath = res;
-  if (filepath === undefined || filepath === null) {
-    imageLayer.openImg("./assets/addImage.png", "png");
+  imageLayer.filepath = res;
+  if (imageLayer.filepath === undefined || imageLayer.filepath === null) {
+    imageLayer.openImg("./assets/addImage.png");
   } else {
-    extension = path.extname(filepath).replace(".", "");
-    imageLayopenImg(filepath, extension);
+    imageLayer.openImg(imageLayer.filepath);
   }
 });
 
 ipcRenderer.on("setExtensionCMD", (event) => {
-  ipcRenderer.send("extensionValueSEND", extension);
+  ipcRenderer.send("extensionValueSEND", imageLayer.extension);
 });
 
 ipcRenderer.on("saveImgCMD", (event) => {
-  imageLayer.saveImg(filepath, extension);
+  // console.log(imageLayer.filepath, imageLayer.extension);
+  if (imageLayer.filepath !== "./assets/addImage.png") {
+    imageLayer.saveImg(imageLayer.filepath);
+  }
 });
 
 ipcRenderer.on("saveAsImgCMD", (event, res) => {
-  imageLayer.saveImg(res, extension);
-  filepath = res;
-});
-
-function undoPreviewImg() {
-  if (i === 0) return;
-
-  i--;
-  console.log(i);
-  try {
-    buffer = bufferQueue[i];
-    infos = infoQueue[i];
-    extension = extensionQueue[i];
-
-    canvas.width = infoQueue[i].width;
-    canvas.height = infoQueue[i].height;
-
-    image.src = `data:image/${extension};base64, ` + buffer.toString("base64");
-    image.onload = () => {
-      imageLayer.ctx.drawImage(image, 0, 0);
-    };
-
-    imageLayer.updateImgInfoText(infos);
-    imageLayer.extractMainColors(buffer, infos);
-    imageLayer.updateExtension(extension);
-  } catch (err) {
-    i++;
-  }
-}
-
-function redoPreviewImg() {
-  i++;
-  try {
-    buffer = bufferQueue[i];
-    infos = infoQueue[i];
-    extension = extensionQueue[i];
-
-    canvas.width = infoQueue[i].width;
-    canvas.height = infoQueue[i].height;
-
-    image.src = `data:image/${extension};base64, ` + buffer.toString("base64");
-    image.onload = () => {
-      imageLayer.ctx.drawImage(image, 0, 0);
-    };
-
-    imageLayer.updateImgInfoText(infos);
-    imageLayer.extractMainColors(buffer, infos);
-    imageLayer.updateExtension(extension);
-  } catch (err) {
-    i--;
-  }
-}
-
-canvas.addEventListener("drag", function (event) {}, false);
-
-canvas.addEventListener(
-  "dragover",
-  function (event) {
-    event.preventDefault();
-  },
-  false
-);
-
-canvas.addEventListener(
-  "drop",
-  function (event) {
-    event.preventDefault();
-    filepath = event.dataTransfer.files[0]["path"];
-    extension = path.extname(filepath).replace(".", "");
-    imageLayer.openImg(filepath, extension);
-  },
-  false
-);
-
-function inactivate() {}
-
-imageLayer.extensionComboBox.addEventListener("change", (event) => {
-  extension = event.target.value;
-  sharp(buffer)
-    .toFormat(extension)
-    .toBuffer((err, buf, info) => {
-      buffer = buf;
-      imageLayer.updatePreviewImg(buf, info, extension);
-      document
-        .getElementById("convert_msg")
-        .animate([{ opacity: "1" }, { opacity: "0" }], {
-          duration: 1800,
-          iterations: 1,
-        });
-    });
+  imageLayer.saveImg(res);
 });
 
 document.getElementById("mainColor1").addEventListener("click", (event) => {
@@ -435,14 +282,18 @@ document.getElementById("mainColor3").addEventListener("click", (event) => {
 
 document.addEventListener("keydown", function (event) {
   if (event.ctrlKey && event.key === "z") {
-    undoPreviewImg();
+    imageLayer.undoPreviewImg();
   } else if (event.ctrlKey && event.key === "y") {
-    redoPreviewImg();
+    imageLayer.redoPreviewImg();
   } else if (event.ctrlKey && event.key === "s") {
     ipcRenderer.send("saveImgREQ");
   } else if (event.which === 122) {
-    ipcRenderer.send("FullScreenREQ");
-  } else if (event.key === "Escape") {
-    ipcRenderer.send("DefaultScreenREQ");
+    if (!fullScreenFlag) {
+      ipcRenderer.send("FullScreenREQ");
+      fullScreenFlag = true;
+    } else {
+      ipcRenderer.send("DefaultScreenREQ");
+      fullScreenFlag = false;
+    }
   }
 });

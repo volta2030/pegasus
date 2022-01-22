@@ -1,16 +1,46 @@
 const sharp = require("sharp");
+var path = require("path");
 
 class ImageLayer {
   static drawFlag = false;
   static cropFlag = false;
+  static dragFlag = false;
+
   constructor() {
+    this.filepath = null;
+    this.buffer;
+    this.information;
+    this.extension;
+    this.bufferQueue = [];
+    this.infoQueue = [];
+    this.extensionQueue = [];
+    this.i = -1;
+
     //initialize
     this.imgPanel = document.createElement("div");
-    this.imgPanel.id = "imgPanel";
+    this.imgPanel.className = "imgPanel";
 
     this.canvas = document.createElement("canvas");
     this.canvas.setAttribute("class", "img-canvas");
-    this.canvas.id = "previewImg";
+    this.canvas.className = "previewImg";
+    this.canvas.addEventListener("drag", function (event) {}, false);
+
+    this.canvas.addEventListener(
+      "dragover",
+      function (event) {
+        event.preventDefault();
+      },
+      false
+    );
+
+    this.canvas.addEventListener(
+      "drop",
+      function (event) {
+        event.preventDefault();
+        this.openImg(event.dataTransfer.files[0]["path"]);
+      },
+      false
+    );
 
     this.mainColorBox = document.createElement("div");
     this.mainColorBox.id = "mainColorBox";
@@ -48,20 +78,7 @@ class ImageLayer {
     this.webpOption.value = "webp";
     this.webpOption.innerText = "webp";
 
-    // <select id="extensionComboBox">
-    //   <option value="default"></option>
-    //   <option value="png">png</option>
-    //   <option value="jpg">jpg</option>
-    //   <option value="jpeg">jpeg</option>
-    //   <option value="webp">webp</option>
-    // </select>;
-
     this.ctx = this.canvas.getContext("2d");
-
-    // this.bufferQueue = [];
-    // this.infoQueue = [];
-    // this.extensionQueue = [];
-    // this.i = -1;
 
     this.initialX;
     this.initialY;
@@ -78,6 +95,58 @@ class ImageLayer {
   }
 
   build() {
+    this.canvas.addEventListener("mousedown", (event) => {
+      ImageLayer.dragFlag = true;
+      if (ImageLayer.drawFlag) {
+        // console.log( ImageLayer.drawFlag);
+        this.ctx.beginPath();
+        this.ctx.moveTo(
+          event.clientX - this.canvas.getBoundingClientRect().left,
+          event.clientY - this.canvas.getBoundingClientRect().top
+        );
+        this.canvas.addEventListener("mousemove", (evt) => {
+          if (ImageLayer.dragFlag && ImageLayer.drawFlag) {
+            this.ctx.lineTo(
+              evt.x - this.canvas.getBoundingClientRect().left,
+              evt.y - this.canvas.getBoundingClientRect().top
+            );
+            this.ctx.stroke();
+          }
+        });
+        this.ctx.closePath();
+      }
+
+      if (ImageLayer.cropFlag) {
+        var ctxs = this.canvas.getContext("2d");
+        this.realPosX = event.clientX;
+        this.realPosY = event.clientY;
+        this.initialX =
+          event.clientX - this.canvas.getBoundingClientRect().left;
+        this.initialY = event.clientY - this.canvas.getBoundingClientRect().top;
+        ctxs.setLineDash([2]);
+
+        this.canvas.addEventListener("mousemove", (evt) => {
+          if (ImageLayer.dragFlag && ImageLayer.cropFlag) {
+            ctxs.clearRect(
+              0,
+              0,
+              this.canvas.clientWidth,
+              this.canvas.clientHeight
+            );
+            this.cropWidth = evt.clientX - event.clientX;
+            this.cropHeight = evt.clientY - event.clientY;
+            ctxs.drawImage(this.image, 0, 0);
+            ctxs.strokeRect(
+              this.initialX,
+              this.initialY,
+              this.cropWidth,
+              this.cropHeight
+            );
+          }
+        });
+      }
+    });
+
     this.imgPanel.appendChild(this.canvas);
     this.imgPanel.appendChild(this.mainColorBox);
     this.imgPanel.appendChild(this.imgInfoText);
@@ -92,41 +161,64 @@ class ImageLayer {
     this.extensionComboBox.appendChild(this.jpgOption);
     this.extensionComboBox.appendChild(this.jpegOption);
     this.extensionComboBox.appendChild(this.webpOption);
+    this.extensionComboBox.addEventListener("change", (event) => {
+      this.extension = event.target.value;
+      this.filepath = this.filepath.replace(
+        path.extname(this.filepath),
+        `.${this.extension}`
+      );
+      sharp(this.buffer)
+        .toFormat(this.extension)
+        .toBuffer((err, buf, info) => {
+          this.updatePreviewImg(buf, info);
+          document
+            .getElementById("convert_msg")
+            .animate([{ opacity: "1" }, { opacity: "0" }], {
+              duration: 1800,
+              iterations: 1,
+            });
+        });
+    });
   }
 
-  updatePreviewImg(buf, info, extension) {
-    console.log(info);
+  updatePreviewImg(buf, info) {
+    console.log("updatePreviewImg");
+    this.buffer = buf;
+    this.information = info;
+    // this.extension = extension;
 
-    canvas.width = info.width;
-    canvas.height = info.height;
+    this.canvas.width = info.width;
+    this.canvas.height = info.height;
 
-    image.src = `data:image/${extension};base64, ` + buf.toString("base64");
-    image.onload = () => {
-      this.ctx.drawImage(image, 0, 0, info.width, info.height);
+    this.image.src =
+      `data:image/${this.extension};base64, ` + buf.toString("base64");
+    this.image.onload = () => {
+      this.ctx.drawImage(this.image, 0, 0, info.width, info.height);
     };
 
     this.updateImgInfoText(info);
     this.extractMainColors(buf, info);
-    this.updateExtension(extension);
+    this.updateExtension();
 
-    buffer = buf;
-    i++;
+    this.buffer = buf;
+    this.i++;
+    console.log(this.i);
 
-    if (i > 10) {
-      bufferQueue.shift();
-      infoQueue.shift();
-      extensionQueue.shift();
-      i--;
+    if (this.i > 10) {
+      this.bufferQueue.shift();
+      this.infoQueue.shift();
+      this.extensionQueue.shift();
+      this.i--;
     } else {
-      if (bufferQueue[i + 1] !== null) {
-        bufferQueue = bufferQueue.slice(0, i);
-        infoQueue = infoQueue.slice(0, i);
-        extensionQueue = extensionQueue.slice(0, i);
+      if (this.bufferQueue[this.i + 1] !== null) {
+        this.bufferQueue = this.bufferQueue.slice(0, this.i);
+        this.infoQueue = this.infoQueue.slice(0, this.i);
+        this.extensionQueue = this.extensionQueue.slice(0, this.i);
       }
     }
-    bufferQueue.push(buf);
-    infoQueue.push(info);
-    extensionQueue.push(extension);
+    this.bufferQueue.push(buf);
+    this.infoQueue.push(info);
+    this.extensionQueue.push(this.extension);
   }
 
   updateImgInfoText(info) {
@@ -210,19 +302,22 @@ class ImageLayer {
       });
   }
 
-  updateExtension(extension) {
-    this.extensionComboBox.value = extension;
+  updateExtension() {
+    this.extensionComboBox.value = this.extension;
   }
 
-  openImg(filepath, extension) {
+  openImg(filepath) {
+    this.filepath = filepath;
+    this.extension = path.extname(this.filepath).replace(".", "");
     sharp(filepath).toBuffer((err, buf, info) => {
-      this.updatePreviewImg(buf, info, extension);
+      this.updatePreviewImg(buf, info);
     });
   }
 
-  saveImg(filepath, extension) {
+  saveImg(filepath) {
+    this.filepath = filepath;
     var base64Data = this.image.src.replace(
-      `data:image/${extension};base64,`,
+      `data:image/${this.extension};base64,`,
       ""
     );
 
@@ -240,10 +335,64 @@ class ImageLayer {
       }
     });
   }
+
+  undoPreviewImg() {
+    if (this.i === 0) return;
+    this.i--;
+    console.log(this.i);
+    try {
+      this.buffer = this.bufferQueue[this.i];
+      this.information = this.infoQueue[this.i];
+      this.extension = this.extensionQueue[this.i];
+
+      this.canvas.width = this.infoQueue[this.i].width;
+      this.canvas.height = this.infoQueue[this.i].height;
+
+      this.image.src =
+        `data:image/${this.extension};base64, ` +
+        this.buffer.toString("base64");
+      this.image.onload = () => {
+        this.ctx.drawImage(this.image, 0, 0);
+      };
+
+      this.updateImgInfoText(this.information);
+      this.extractMainColors(this.buffer, this.information);
+      this.updateExtension();
+    } catch (err) {
+      console.log(err);
+      this.i++;
+    }
+  }
+
+  redoPreviewImg() {
+    this.i++;
+    try {
+      this.buffer = this.bufferQueue[this.i];
+      this.information = this.infoQueue[this.i];
+      this.extension = this.extensionQueue[this.i];
+
+      this.canvas.width = this.infoQueue[this.i].width;
+      this.canvas.height = this.infoQueue[this.i].height;
+
+      this.image.src =
+        `data:image/${this.extension};base64, ` +
+        this.buffer.toString("base64");
+      this.image.onload = () => {
+        this.ctx.drawImage(this.image, 0, 0);
+      };
+
+      this.updateImgInfoText(this.information);
+      this.extractMainColors(this.buffer, this.information);
+      this.updateExtension();
+    } catch (err) {
+      this.i--;
+    }
+  }
 }
 
 module.exports = {
   ImageLayer: ImageLayer,
   drawFlag: ImageLayer.drawFlag,
   cropFlag: ImageLayer.cropFlag,
+  dragFlag: ImageLayer.dragFlag,
 };

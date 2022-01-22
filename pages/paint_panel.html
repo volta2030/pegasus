@@ -11,6 +11,53 @@
     <button id="drawBtn" title="draw">
       <img class="icon" src="../assets/draw.ico" />
     </button>
+
+    <button id="grayScaleBtn" title="gray scale">
+      <img class="icon" src="../assets/gray_scale.ico" />
+    </button>
+
+    <div id="tintBox">
+      <div class="tintBar">
+        <div class="charDiv">R</div>
+        <input
+          id="redValue"
+          type="range"
+          min="0"
+          max="255"
+          placeholder="123"
+          step="1"
+          style="width: 150px; height: 12px"
+        />
+      </div>
+      <div class="tintBar">
+        <div class="charDiv">G</div>
+        <input
+          id="greenValue"
+          type="range"
+          min="0"
+          max="255"
+          placeholder="123"
+          step="1"
+          style="width: 150px; height: 12px"
+        />
+      </div>
+      <div class="tintBar">
+        <div class="charDiv">B</div>
+        <input
+          id="blueValue"
+          type="range"
+          min="0"
+          max="255"
+          placeholder="123"
+          step="1"
+          style="width: 150px; height: 12px"
+        />
+      </div>
+      <button id="tintExecuteBtn" title="tint">
+        <img class="icon" src="../assets/tint.ico" />
+      </button>
+    </div>
+
     <script src="../renderer/paint_renderer.js"></script>
   </body>
 </html>

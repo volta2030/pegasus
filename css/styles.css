@@ -31,7 +31,7 @@ body {
   width: 80px;
 }
 
-#imgPanel {
+.imgPanel {
   position: relative;
 }
 
@@ -69,7 +69,7 @@ select#extensionComboBox {
   color: rgba(0, 0, 0, 0.5);
 }
 
-#previewImg {
+.previewImg {
   /* background-color: white; */
   box-shadow: var(--main-shadow);
   position: inherit;
