@@ -2,7 +2,7 @@
 
 #### The Image Processing Tool based on Electron framework & sharp npm package
 
-![image](https://user-images.githubusercontent.com/65960990/149353733-6de247c7-984f-4ad1-8bce-bb37717ca6de.png)
+![image](https://user-images.githubusercontent.com/65960990/150795299-103af483-4d5b-46ff-b00f-61f4cd5ca130.png)
 
 ### development notes
 
