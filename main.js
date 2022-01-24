@@ -1,5 +1,4 @@
-// Modules to control application life and create native browser window
-var electron = require("electron");
+const electron = require("electron");
 const { app, ipcMain, dialog, BrowserWindow, BrowserView, Menu } = electron;
 
 //electron refresh (only develop)
@@ -194,6 +193,10 @@ app.whenReady().then(() => {
 
   ipcMain.on("saveImgREQ", (event) => {
     event.sender.send("saveImgCMD");
+  });
+
+  ipcMain.on("deleteImgREQ", (event) => {
+    event.sender.send("deleteImgCMD");
   });
 
   // main

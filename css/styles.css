@@ -5,6 +5,7 @@ body {
   width: 100vw;
   height: 99vh;
   display: flex;
+
   justify-content: center;
   align-items: center;
   border-top: 1px black solid;
@@ -33,6 +34,8 @@ body {
 
 .imgPanel {
   position: relative;
+  padding: 45px;
+  margin: 10px;
 }
 
 .colorBox {
@@ -45,13 +48,13 @@ select#extensionComboBox {
   border: none;
   position: absolute;
   color: rgba(0, 0, 0, 0.8);
-  bottom: 0px;
-  left: 0px;
+  bottom: 45px;
+  left: 45px;
   font-size: 15px;
   background: none;
 }
 
-#mainColorBox {
+.mainColorBox {
   width: 24px;
   height: 86px;
   position: absolute;
@@ -59,8 +62,8 @@ select#extensionComboBox {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  right: -28px;
-  top: 0px;
+  right: 15px;
+  top: 45px;
 }
 
 #imgInfoText {

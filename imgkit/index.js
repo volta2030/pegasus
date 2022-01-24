@@ -1,6 +1,17 @@
 const sharp = require("sharp");
 var path = require("path");
 
+// class ImageLayerQueue {
+//   static imageLayerQueue = [];
+//   static num = 0;
+// }
+
+const imageLayerQueue = [];
+
+class Parameter {
+  static num = 0;
+}
+
 class ImageLayer {
   static drawFlag = false;
   static cropFlag = false;
@@ -15,47 +26,80 @@ class ImageLayer {
     this.infoQueue = [];
     this.extensionQueue = [];
     this.i = -1;
+    this.sio = false;
 
     //initialize
     this.imgPanel = document.createElement("div");
     this.imgPanel.className = "imgPanel";
+    this.imgPanel.id = Parameter.num;
 
     this.canvas = document.createElement("canvas");
     this.canvas.setAttribute("class", "img-canvas");
     this.canvas.className = "previewImg";
-    this.canvas.addEventListener("drag", function (event) {}, false);
-
-    this.canvas.addEventListener(
-      "dragover",
-      function (event) {
-        event.preventDefault();
-      },
-      false
-    );
-
-    this.canvas.addEventListener(
-      "drop",
-      function (event) {
-        event.preventDefault();
-        this.openImg(event.dataTransfer.files[0]["path"]);
-      },
-      false
-    );
 
     this.mainColorBox = document.createElement("div");
-    this.mainColorBox.id = "mainColorBox";
+    this.mainColorBox.className = "mainColorBox";
 
     this.mainColor1 = document.createElement("div");
-    this.mainColor1.id = "mainColor1";
+    this.mainColor1.className = "mainColor1";
     this.mainColor1.className = "colorBox";
 
     this.mainColor2 = document.createElement("div");
-    this.mainColor2.id = "mainColor2";
+    this.mainColor2.className = "mainColor2";
     this.mainColor2.className = "colorBox";
 
     this.mainColor3 = document.createElement("div");
-    this.mainColor3.id = "mainColor3";
+    this.mainColor3.className = "mainColor3";
     this.mainColor3.className = "colorBox";
+
+    this.mainColor1.addEventListener("click", (event) => {
+      const text = document.createElement("textarea");
+      this.imgPanel.appendChild(text);
+      text.value = this.mainColor1.title;
+      text.select();
+      document.execCommand("Copy");
+      this.imgPanel.removeChild(text);
+
+      document
+        .getElementById("copy_msg")
+        .animate([{ opacity: "1" }, { opacity: "0" }], {
+          duration: 1800,
+          iterations: 1,
+        });
+    });
+
+    this.mainColor2.addEventListener("click", (event) => {
+      const text = document.createElement("textarea");
+      this.imgPanel.appendChild(text);
+      text.value = this.mainColor2.title;
+      text.select();
+      document.execCommand("Copy");
+      this.imgPanel.removeChild(text);
+
+      document
+        .getElementById("copy_msg")
+        .animate([{ opacity: "1" }, { opacity: "0" }], {
+          duration: 1800,
+          iterations: 1,
+        });
+    });
+
+    this.mainColor3.addEventListener("click", (event) => {
+      const text = document.createElement("textarea");
+      this.imgPanel.appendChild(text);
+      text.value = this.mainColor3.title;
+      text.select();
+      document.execCommand("Copy");
+      this.imgPanel.removeChild(text);
+
+      document
+        .getElementById("copy_msg")
+        .animate([{ opacity: "1" }, { opacity: "0" }], {
+          duration: 1800,
+          iterations: 1,
+        });
+    });
+
     //
     this.imgInfoText = document.createElement("h2");
     this.imgInfoText.id = "imgInfoText";
@@ -95,6 +139,34 @@ class ImageLayer {
   }
 
   build() {
+    this.imgPanel.addEventListener("click", (event) => {
+      this.imgPanel.focus();
+      Parameter.num = this.imgPanel.id;
+      this.updateFocus();
+      this.updateSio();
+      // console.log(this.imgPanel.id);
+      // console.log(Parameter.num);
+    });
+
+    this.canvas.addEventListener("drag", function (event) {}, false);
+
+    this.canvas.addEventListener(
+      "dragover",
+      function (event) {
+        event.preventDefault();
+      },
+      false
+    );
+
+    this.canvas.addEventListener("drop", (event) => {
+      event.preventDefault();
+      this.openImg(event.dataTransfer.files[0]["path"]);
+      Parameter.num++;
+      imageLayerQueue.push(new ImageLayer());
+      document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
+      imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
+    });
+
     this.canvas.addEventListener("mousedown", (event) => {
       ImageLayer.dragFlag = true;
       if (ImageLayer.drawFlag) {
@@ -102,13 +174,13 @@ class ImageLayer {
         this.ctx.beginPath();
         this.ctx.moveTo(
           event.clientX - this.canvas.getBoundingClientRect().left,
-          event.clientY - this.canvas.getBoundingClientRect().top
+          event.clientY - this.canvas.getBoundingClientRect().top + 16
         );
         this.canvas.addEventListener("mousemove", (evt) => {
           if (ImageLayer.dragFlag && ImageLayer.drawFlag) {
             this.ctx.lineTo(
               evt.x - this.canvas.getBoundingClientRect().left,
-              evt.y - this.canvas.getBoundingClientRect().top
+              evt.y - this.canvas.getBoundingClientRect().top + 16
             );
             this.ctx.stroke();
           }
@@ -181,12 +253,37 @@ class ImageLayer {
     });
   }
 
+  updateFocus() {
+    for (var j = 0; j < imageLayerQueue.length; j++) {
+      // console.log(imageLayerQueue.length);
+      // console.log(Parameter.num);
+      // console.log(j);
+      if (j == Parameter.num) {
+        imageLayerQueue[j].imgPanel.style.border = "solid #e0e0e0 1px";
+        imageLayerQueue[j].imgPanel.style.borderRadius = "5px";
+      } else {
+        imageLayerQueue[j].imgPanel.style.border = "none";
+      }
+    }
+  }
+
+  updateSio() {
+    if (this.sio) {
+      document.getElementById("showImageOnlyCheckBox").checked = true;
+      this.mainColorBox.style.visibility = "hidden";
+      this.imgInfoText.style.visibility = "hidden";
+      this.extensionComboBox.style.visibility = "hidden";
+    } else {
+      document.getElementById("showImageOnlyCheckBox").checked = false;
+      this.mainColorBox.style.visibility = "visible";
+      this.imgInfoText.style.visibility = "visible";
+      this.extensionComboBox.style.visibility = "visible";
+    }
+  }
+
   updatePreviewImg(buf, info) {
-    console.log("updatePreviewImg");
     this.buffer = buf;
     this.information = info;
-    // this.extension = extension;
-
     this.canvas.width = info.width;
     this.canvas.height = info.height;
 
@@ -202,7 +299,7 @@ class ImageLayer {
 
     this.buffer = buf;
     this.i++;
-    console.log(this.i);
+    // console.log(this.i);
 
     if (this.i > 10) {
       this.bufferQueue.shift();
@@ -339,7 +436,7 @@ class ImageLayer {
   undoPreviewImg() {
     if (this.i === 0) return;
     this.i--;
-    console.log(this.i);
+    // console.log(this.i);
     try {
       this.buffer = this.bufferQueue[this.i];
       this.information = this.infoQueue[this.i];
@@ -392,7 +489,9 @@ class ImageLayer {
 
 module.exports = {
   ImageLayer: ImageLayer,
+  Parameter: Parameter,
   drawFlag: ImageLayer.drawFlag,
   cropFlag: ImageLayer.cropFlag,
   dragFlag: ImageLayer.dragFlag,
+  imageLayerQueue: imageLayerQueue,
 };

@@ -14,9 +14,11 @@ document.getElementById("resizeExecuteBtn").addEventListener("click", () => {
 document.getElementById("cropBtn").addEventListener("click", () => {
   if (!cropFlag) {
     cropFlag = true;
+    document.getElementById("cropBtn").style.backgroundColor = "gray";
     if (drawFlag) drawFlag = false;
   } else {
     cropFlag = false;
+    document.getElementById("cropBtn").style.backgroundColor = "#efefef";
   }
   ipcRenderer.send("cropImgREQ", cropFlag);
 });
