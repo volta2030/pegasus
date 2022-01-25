@@ -45,7 +45,6 @@ function createView(type, mainWindow) {
   view.setBounds({ x: 0, y: 32, width: 1280, height: 90 });
   view.setAutoResize({ width: true, height: false });
   view.webContents.loadFile(`./pages/_panel.html`);
-
   // view.webContents.openDevTools();
 }
 

@@ -36,6 +36,7 @@ class ImageLayer {
     this.canvas = document.createElement("canvas");
     this.canvas.setAttribute("class", "img-canvas");
     this.canvas.className = "previewImg";
+    this.canvas.id = "default";
 
     this.mainColorBox = document.createElement("div");
     this.mainColorBox.className = "mainColorBox";
@@ -140,7 +141,6 @@ class ImageLayer {
 
   build() {
     this.imgPanel.addEventListener("click", (event) => {
-      this.imgPanel.focus();
       Parameter.num = this.imgPanel.id;
       this.updateFocus();
       this.updateSio();
@@ -160,11 +160,13 @@ class ImageLayer {
 
     this.canvas.addEventListener("drop", (event) => {
       event.preventDefault();
+      if (this.canvas.id !== "full") {
+        Parameter.num++;
+        imageLayerQueue.push(new ImageLayer());
+        document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
+        imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
+      }
       this.openImg(event.dataTransfer.files[0]["path"]);
-      Parameter.num++;
-      imageLayerQueue.push(new ImageLayer());
-      document.body.appendChild(imageLayerQueue[Parameter.num].imgPanel);
-      imageLayerQueue[Parameter.num].openImg("./assets/addImage.png");
     });
 
     this.canvas.addEventListener("mousedown", (event) => {
@@ -174,13 +176,13 @@ class ImageLayer {
         this.ctx.beginPath();
         this.ctx.moveTo(
           event.clientX - this.canvas.getBoundingClientRect().left,
-          event.clientY - this.canvas.getBoundingClientRect().top + 16
+          event.clientY - this.canvas.getBoundingClientRect().top
         );
         this.canvas.addEventListener("mousemove", (evt) => {
           if (ImageLayer.dragFlag && ImageLayer.drawFlag) {
             this.ctx.lineTo(
               evt.x - this.canvas.getBoundingClientRect().left,
-              evt.y - this.canvas.getBoundingClientRect().top + 16
+              evt.y - this.canvas.getBoundingClientRect().top
             );
             this.ctx.stroke();
           }
@@ -265,6 +267,7 @@ class ImageLayer {
         imageLayerQueue[j].imgPanel.style.border = "none";
       }
     }
+    this.imgPanel.focus();
   }
 
   updateSio() {
@@ -404,6 +407,9 @@ class ImageLayer {
   }
 
   openImg(filepath) {
+    if (filepath !== "./assets/addImage.png") {
+      this.canvas.id = "full";
+    }
     this.filepath = filepath;
     this.extension = path.extname(this.filepath).replace(".", "");
     sharp(filepath).toBuffer((err, buf, info) => {

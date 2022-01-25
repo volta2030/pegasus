@@ -256,10 +256,6 @@ ipcRenderer.on("saveAsImgCMD", (event, res) => {
   imageLayerQueue[Parameter.num].saveImg(res);
 });
 
-ipcRenderer.on("deleteImgCMD", (event) => {
-  console.log(Parameter.num);
-});
-
 document.addEventListener("keydown", function (event) {
   if (event.ctrlKey && event.key === "z") {
     imageLayerQueue[Parameter.num].undoPreviewImg();
@@ -267,9 +263,6 @@ document.addEventListener("keydown", function (event) {
     imageLayerQueue[Parameter.num].redoPreviewImg();
   } else if (event.ctrlKey && event.key === "s") {
     ipcRenderer.send("saveImgREQ");
-  } else if (event.which === 46) {
-    ipcRenderer.send("deleteImgREQ");
-    console.log("delete");
   } else if (event.which === 122) {
     if (!fullScreenFlag) {
       ipcRenderer.send("FullScreenREQ");
