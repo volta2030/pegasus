@@ -147,7 +147,7 @@ class ImageLayer {
       // console.log(this.imgPanel.id);
       // console.log(Parameter.num);
     });
-
+    // this.ctx.lineWidth = 1;
     this.canvas.addEventListener("drag", function (event) {}, false);
 
     this.canvas.addEventListener(
@@ -220,6 +220,12 @@ class ImageLayer {
         });
       }
     });
+
+    this.canvas.addEventListener("mouseup",(event)=>{
+      if(ImageLayer.drawFlag){
+        //paste
+      }
+    })
 
     this.imgPanel.appendChild(this.canvas);
     this.imgPanel.appendChild(this.mainColorBox);

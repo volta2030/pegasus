@@ -1,9 +1,10 @@
 const { ipcRenderer } = require("electron");
-const { ImageLayer, Parameter, imageLayerQueue } = require("imgkit");
+const { ImageLayer, Parameter, imageLayerQueue, drawFlag } = require("imgkit");
 var { num } = require("imgkit");
 const sharp = require("sharp");
 var path = require("path");
 var fullScreenFlag = false;
+var lineWidth = 1;
 
 ["resizeBtn", "filterBtn", "rotateBtn", "paintBtn"].forEach(
   (item, index, arr) => {
@@ -271,5 +272,23 @@ document.addEventListener("keydown", function (event) {
       ipcRenderer.send("DefaultScreenREQ");
       fullScreenFlag = false;
     }
+  }
+});
+
+document.addEventListener('wheel', function (event) {
+  if(event.ctrlKey){
+    if(ImageLayer.drawFlag){
+      if (event.deltaY> 0 || event.detail < 0) {
+        // scroll up
+        lineWidth++;
+    }
+    else {
+        // scroll down
+        if(lineWidth > 1){
+          lineWidth--;
+        }
+    }
+    imageLayerQueue[Parameter.num].ctx.lineWidth = lineWidth;
+  }
   }
 });
