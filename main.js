@@ -2,9 +2,9 @@ const electron = require("electron");
 const { app, ipcMain, dialog, BrowserWindow, BrowserView, Menu } = electron;
 
 //electron refresh (only develop)
-// require("electron-reload")(__dirname, {
-//   electron: require(`${__dirname}/node_modules/electron`),
-// });
+require("electron-reload")(__dirname, {
+  electron: require(`${__dirname}/node_modules/electron`),
+});
 
 function createMainWindow() {
   // Create the browser window.
@@ -41,10 +41,27 @@ function createView(type, mainWindow) {
       //   preload: path.join(__dirname, "preload.js"),
     },
   });
-  mainWindow.setBrowserView(view);
+
+  const view2 = new BrowserView({
+    resizable: true,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      enableRemoteModule: true,
+      // devTools: true,
+      //   preload: path.join(__dirname, "preload.js"),
+    },
+  });
+
   view.setBounds({ x: 0, y: 32, width: 1280, height: 90 });
   view.setAutoResize({ width: true, height: false });
   view.webContents.loadFile(`./pages/_panel.html`);
+  mainWindow.addBrowserView(view);
+
+  view2.setBounds({ x: 0, y: 150, width: 90, height: 200 });
+  view2.setAutoResize({ width: true, height: false });
+  view2.webContents.loadFile(`./pages/imagelist_panel.html`);
+  mainWindow.addBrowserView(view2);
   // view.webContents.openDevTools();
 }
 
@@ -75,7 +92,7 @@ app.whenReady().then(() => {
     (item, index, arr) => {
       ipcMain.on(item, (event) => {
         mainWindow
-          .getBrowserView()
+          .getBrowserViews()[0]
           .webContents.loadFile(
             `./pages/${item.replace("ImgREQ", "")}_panel.html`
           );
@@ -246,7 +263,7 @@ app.whenReady().then(() => {
                 title: "About",
                 buttons: ["Ok"],
                 message:
-                  "Author : volta2030\nVersion : v1.0.0\nLicense : MIT Lisence\n",
+                  "Author : humasoft\nVersion : v1.0.0\nLicense : MIT Lisence\n",
               });
             },
           },

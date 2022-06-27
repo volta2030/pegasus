@@ -11,6 +11,10 @@ body {
   box-shadow: var(--main-shadow);
 }
 
+.draggable {
+  -webkit-app-region: drag;
+}
+
 .icon {
   width: 36px;
   height: 36px;

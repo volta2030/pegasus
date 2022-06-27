@@ -308,7 +308,6 @@ class ImageLayer {
 
     this.buffer = buf;
     this.i++;
-    // console.log(this.i);
 
     if (this.i > 10) {
       this.bufferQueue.shift();

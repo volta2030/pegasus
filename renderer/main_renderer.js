@@ -245,7 +245,6 @@ ipcRenderer.on("setExtensionCMD", (event) => {
 });
 
 ipcRenderer.on("saveImgCMD", (event) => {
-  // console.log(imageLayerQueue[Parameter.num].filepath, imageLayerQueue[Parameter.num].extension);
   if (imageLayerQueue[Parameter.num].filepath !== "./assets/addImage.png") {
     imageLayerQueue[Parameter.num].saveImg(
       imageLayerQueue[Parameter.num].filepath
@@ -275,20 +274,19 @@ document.addEventListener("keydown", function (event) {
   }
 });
 
-document.addEventListener('wheel', function (event) {
-  if(event.ctrlKey){
-    if(ImageLayer.drawFlag){
-      if (event.deltaY> 0 || event.detail < 0) {
+document.addEventListener("wheel", function (event) {
+  if (event.ctrlKey) {
+    if (ImageLayer.drawFlag) {
+      if (event.deltaY > 0 || event.detail < 0) {
         // scroll up
         lineWidth++;
-    }
-    else {
+      } else {
         // scroll down
-        if(lineWidth > 1){
+        if (lineWidth > 1) {
           lineWidth--;
         }
+      }
+      imageLayerQueue[Parameter.num].ctx.lineWidth = lineWidth;
     }
-    imageLayerQueue[Parameter.num].ctx.lineWidth = lineWidth;
-  }
   }
 });
